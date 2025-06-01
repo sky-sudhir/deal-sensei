@@ -25,8 +25,6 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { API_PIPELINE_CREATE, API_PIPELINE_UPDATE } from "../../imports/api";
-import { toast } from "sonner";
-
 // Schema for pipeline validation
 const pipelineSchema = yup.object({
   name: yup.string().required("Pipeline name is required"),

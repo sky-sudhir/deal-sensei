@@ -28,7 +28,7 @@ class UserController {
       }
 
       // Don't allow deactivating yourself
-      if (user._id.toString() === req.user._id.toString()) {
+      if (user._id.toString() === req.user.userId.toString()) {
         return response.badRequest("You cannot deactivate your own account");
       }
 
@@ -65,7 +65,9 @@ class UserController {
       const companyId = req.user.company_id;
 
       // Only get active users by default
-      const query = { is_active: req.query?.showInactive === "true" };
+      const query = {
+        is_active: req.query?.showInactive === "true" ? false : true,
+      };
 
       // If showAll query param is true and user is admin, show all users
       if (req.query.showAll === "true" && req.user.role === "admin") {

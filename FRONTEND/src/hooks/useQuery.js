@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logout } from "@/redux/features/user/userSlice";
 
-export default function useQuery(url, {cb=null,skip=false}={}) {
+export default function useQuery(url, { cb = null, skip = false } = {}) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -19,13 +19,15 @@ export default function useQuery(url, {cb=null,skip=false}={}) {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await apiHandler({ url });
+      const response = await apiHandler({
+        url,
+      });
       if (response.status === 403 || response.status == 401) {
         handleLogout();
       }
-      if(cb){
+      if (cb) {
         setData(cb(response));
-      }else{
+      } else {
         setData(response);
       }
     } catch (error) {
@@ -43,3 +45,13 @@ export default function useQuery(url, {cb=null,skip=false}={}) {
 
   return { data, loading, error, refetch: fetchData };
 }
+
+export const generateParam = (params) => {
+  const keys = Object.keys(params);
+  const result = keys
+    .map((key) => {
+      return `${key}=${params[key]}`;
+    })
+    .join("&");
+  return keys.length > 0 ? `${result}` : "";
+};

@@ -1,36 +1,42 @@
-import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { toast } from 'sonner';
-import PipelineForm from './PipelineForm';
-import { Button } from '../../components/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import useQuery from '../../hooks/useQuery';
-import { API_PIPELINE_DETAILS } from '../../imports/api';
+import React from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import PipelineForm from "./PipelineForm";
+import { Button } from "../../components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import useQuery from "../../hooks/useQuery";
+import { API_PIPELINE_DETAILS } from "../../imports/api";
 
 const EditPipeline = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  
+
   // Fetch pipeline details
-  const { data: pipelineResponse, loading, error } = useQuery(`${API_PIPELINE_DETAILS}${id}`);
+  const {
+    data: pipelineResponse,
+    loading,
+    error,
+  } = useQuery(`${API_PIPELINE_DETAILS}${id}`);
   const pipeline = pipelineResponse?.data?.data;
 
   const handleSuccess = () => {
-    toast.success('Pipeline updated successfully');
-    navigate('/pipelines');
+    navigate("/pipelines");
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center h-64">Loading pipeline details...</div>;
+    return (
+      <div className="flex justify-center items-center h-64">
+        Loading pipeline details...
+      </div>
+    );
   }
 
   if (error || !pipeline) {
     return (
       <div className="container mx-auto py-6">
         <div className="mb-6">
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate('/pipelines')}
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/pipelines")}
             className="mb-4"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -38,11 +44,14 @@ const EditPipeline = () => {
           </Button>
         </div>
         <div className="bg-destructive/10 p-6 rounded-lg border border-destructive text-center">
-          <h2 className="text-xl font-semibold text-destructive mb-2">Error Loading Pipeline</h2>
+          <h2 className="text-xl font-semibold text-destructive mb-2">
+            Error Loading Pipeline
+          </h2>
           <p className="text-muted-foreground mb-4">
-            We couldn't load the pipeline details. It may have been deleted or you don't have permission to view it.
+            We couldn't load the pipeline details. It may have been deleted or
+            you don't have permission to view it.
           </p>
-          <Button onClick={() => navigate('/pipelines')}>
+          <Button onClick={() => navigate("/pipelines")}>
             Return to Pipeline List
           </Button>
         </div>
@@ -53,9 +62,9 @@ const EditPipeline = () => {
   return (
     <div className="container mx-auto py-6">
       <div className="mb-6">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate('/pipelines')}
+        <Button
+          variant="ghost"
+          onClick={() => navigate("/pipelines")}
           className="mb-4"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />

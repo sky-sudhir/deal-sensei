@@ -6,9 +6,12 @@ import { showToast } from "../utils/toast.jsx";
 export default async function apiHandler(query) {
   const token = getToken();
   const { method = "GET", skipToken, contentType, data, params, url } = query;
+  // Ensure we don't have double slashes in the URL
+  const formattedUrl = url.startsWith('/') ? url.substring(1) : url;
+  
   const config = {
     method: method,
-    url: `${BACKEND_URL}${encodeURI(url)}`,
+    url: `${BACKEND_URL}${encodeURI(formattedUrl)}`,
     headers: {
       "Content-Type": contentType || "application/json",
       Authorization: skipToken ? "" : `Bearer ${token}`,
@@ -16,6 +19,8 @@ export default async function apiHandler(query) {
     data: data,
     params: params,
   };
+  
+  console.log('API Request URL:', config.url);
   if (!token || skipToken) {
     config.headers.Authorization = "";
   }

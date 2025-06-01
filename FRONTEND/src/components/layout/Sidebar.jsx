@@ -71,10 +71,20 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           path: "/contacts",
           icon: Users,
         },
+      ],
+    },
+    {
+      title: "Activities",
+      items: [
         {
           name: "Activities",
           path: "/activities",
           icon: Calendar,
+        },
+        {
+          name: "Files",
+          path: "/files",
+          icon: FileText,
         },
       ],
     },
@@ -85,11 +95,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           name: "Messages",
           path: "/messages",
           icon: MessageSquare,
-        },
-        {
-          name: "Documents",
-          path: "/documents",
-          icon: FileText,
         },
       ],
     },

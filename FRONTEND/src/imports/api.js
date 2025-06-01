@@ -63,8 +63,36 @@ export const ORDER_STATUS_UPDATE = "api/orders/{id}/status";
 export const ORDER_CANCEL = "api/orders/{id}/cancel";
 export const SALES_REPORT = "api/orders/reports/sales";
 
-// File upload
-export const FILES_UPLOAD = "api/files/upload";
+// Contact management endpoints
+export const API_CONTACTS_LIST = "api/v1/contacts";
+export const API_CONTACT_CREATE = "api/v1/contacts";
+export const API_CONTACT_DETAILS = "api/v1/contacts/";
+export const API_CONTACT_UPDATE = "api/v1/contacts/";
+export const API_CONTACT_DELETE = "api/v1/contacts/";
+
+// Deal management endpoints
+export const API_DEALS_LIST = "api/v1/deals";
+export const API_DEAL_CREATE = "api/v1/deals";
+export const API_DEAL_DETAILS = "api/v1/deals/";
+export const API_DEAL_UPDATE = "api/v1/deals/";
+export const API_DEAL_DELETE = "api/v1/deals/";
+export const API_DEAL_TRANSFER = "api/v1/deals/{id}/transfer";
+
+// Activity management endpoints
+export const API_ACTIVITIES_LIST = "api/v1/activities";
+export const API_ACTIVITY_CREATE = "api/v1/activities";
+export const API_ACTIVITY_DETAILS = "api/v1/activities/";
+export const API_ACTIVITY_UPDATE = "api/v1/activities/";
+export const API_ACTIVITY_DELETE = "api/v1/activities/";
+export const API_ACTIVITIES_BY_DEAL = "api/v1/activities/deal/";
+export const API_ACTIVITIES_BY_CONTACT = "api/v1/activities/contact/";
+
+// File management endpoints
+export const API_FILES_LIST = "api/v1/files";
+export const API_FILES_UPLOAD = "api/v1/files/upload";
+export const API_FILE_DETAILS = "api/v1/files/";
+export const API_FILE_DELETE = "api/v1/files/";
+export const API_FILES_BY_ENTITY = "api/v1/files/entity/";
 
 // Legacy endpoints (can be removed if not needed)
 export const CASE_STUDY = "case-studies";
