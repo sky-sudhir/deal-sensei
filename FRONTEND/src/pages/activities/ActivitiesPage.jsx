@@ -42,8 +42,8 @@ const ActivitiesPage = () => {
   // Fetch contacts for filter dropdown
   const { data: contactsData } = useQuery(API_CONTACTS_LIST);
 
-  const deals = dealsData?.data?.deals || [];
-  const contacts = contactsData?.data?.contacts || [];
+  const deals = dealsData?.data?.data?.deals || [];
+  const contacts = contactsData?.data?.data?.contacts || [];
 
   // Handle filter changes
   const handleFilterChange = (key, value) => {
@@ -83,7 +83,9 @@ const ActivitiesPage = () => {
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Activities</h1>
-        <Button onClick={() => navigate("/activities/new")}>Log Activity</Button>
+        <Button onClick={() => navigate("/activities/new")}>
+          Log Activity
+        </Button>
       </div>
 
       <Card>
@@ -196,7 +198,7 @@ const ActivitiesPage = () => {
             <Button
               variant="outline"
               onClick={handleClearFilters}
-              className="shrink-0"
+              className="shrink-0 text-foreground hover:text-foreground"
             >
               Clear Filters
             </Button>
