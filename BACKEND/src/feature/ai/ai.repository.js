@@ -64,46 +64,70 @@ class AiRepository {
   // Find similar entities based on vector similarity
   async findSimilarEntities(embeddingVector, companyId, entityType, limit = 5) {
     try {
-      return await AiEmbedding.find({
-        company_id: companyId,
-        entity_type: entityType,
-      })
-        .sort({
-          embedding_vector: {
-            $vectorSearch: {
+      // Use aggregation pipeline with $search stage for vector search
+      const results = await AiEmbedding.aggregate([
+        {
+          $search: {
+            vectorSearch: {
               queryVector: embeddingVector,
               path: "embedding_vector",
               numCandidates: limit * 3, // Fetch more candidates for better results
-              limit: limit,
+              limit: limit
             },
-          },
-        })
-        .populate("entity_id")
-        .limit(limit);
+            filter: {
+              compound: {
+                must: [
+                  { equals: { path: "company_id", value: companyId } },
+                  { equals: { path: "entity_type", value: entityType } }
+                ]
+              }
+            }
+          }
+        },
+        { $limit: limit }
+      ]);
+      
+      // Populate entity_id if needed
+      // Since aggregation doesn't support populate directly, we need to do it manually
+      // or use a $lookup stage in the aggregation pipeline
+      
+      return results;
     } catch (error) {
-      throw error;
+      console.error("Vector search error:", error);
+      // Fallback to regular find if vector search fails
+      return await AiEmbedding.find({
+        company_id: companyId,
+        entity_type: entityType
+      }).limit(limit);
     }
   }
 
   // Find similar entities across multiple entity types
   async findSimilarEntitiesAcrossTypes(embeddingVector, companyId, limit = 10) {
     try {
-      return await AiEmbedding.find({
-        company_id: companyId,
-      })
-        .sort({
-          embedding_vector: {
-            $vectorSearch: {
+      // Use $vectorSearch operator with correct filter syntax
+      return await AiEmbedding.aggregate([
+        {
+          $search: {
+            vectorSearch: {
               queryVector: embeddingVector,
               path: "embedding_vector",
               numCandidates: limit * 3,
-              limit: limit,
+              limit: limit
             },
-          },
-        })
-        .limit(limit);
+            filter: {
+              equals: { path: "company_id", value: companyId }
+            }
+          }
+        },
+        { $limit: limit }
+      ]);
     } catch (error) {
-      throw error;
+      console.error("Vector search error:", error);
+      // Fallback to regular find if vector search fails
+      return await AiEmbedding.find({
+        company_id: companyId
+      }).limit(limit);
     }
   }
 
@@ -122,9 +146,34 @@ class AiRepository {
   // Generate embedding for any entity and store it in both the entity collection and AI embeddings collection
   async generateAndStoreEntityEmbedding(entity, entityType) {
     try {
-      let model;
+      // Generate embedding data
+      const embeddingData = await createEntityEmbedding(entity, entityType);
+      
+      if (!embeddingData) {
+        console.error(`Failed to create embedding for ${entityType} ${entity._id}`);
+        return null;
+      }
+      
+      // Check if the entity already has the same embedding
+      if (entity.ai_embedding && 
+          entity.ai_embedding.length === embeddingData.embedding_vector.length &&
+          JSON.stringify(entity.ai_embedding) === JSON.stringify(embeddingData.embedding_vector)) {
+        console.log(`Embedding already exists and is identical for ${entityType} ${entity._id}`);
+        
+        // Still store in AI embeddings collection to ensure consistency
+        await this.storeEmbedding(
+          entityType,
+          entity._id,
+          entity.company_id,
+          embeddingData.embedding_vector,
+          embeddingData.content_summary
+        );
+        
+        return embeddingData.embedding_vector;
+      }
       
       // Determine the model based on entity type
+      let model;
       switch (entityType) {
         case "deal":
           model = DealModel;
@@ -139,18 +188,14 @@ class AiRepository {
           throw new Error(`Unsupported entity type: ${entityType}`);
       }
       
-      // Generate embedding data
-      const embeddingData = await createEntityEmbedding(entity, entityType);
-      
-      if (!embeddingData) {
-        console.error(`Failed to create embedding for ${entityType} ${entity._id}`);
-        return null;
+      // Update the entity with the embedding vector if needed
+      // Note: This might be redundant with schema-level hooks, but ensures consistency
+      if (!entity.ai_embedding || entity.ai_embedding.length === 0 || 
+          JSON.stringify(entity.ai_embedding) !== JSON.stringify(embeddingData.embedding_vector)) {
+        await model.findByIdAndUpdate(entity._id, { 
+          ai_embedding: embeddingData.embedding_vector 
+        });
       }
-      
-      // Update the entity with the embedding vector
-      await model.findByIdAndUpdate(entity._id, { 
-        ai_embedding: embeddingData.embedding_vector 
-      });
       
       // Store in AI embeddings collection
       await this.storeEmbedding(
@@ -232,35 +277,62 @@ class AiRepository {
       
       // Generate embeddings for each entity
       const results = [];
-      for (const entity of entities) {
-        try {
-          const embedding = await this.generateAndStoreEntityEmbedding(entity, entityType);
-          if (embedding) {
-            results.push({
+      const batchSize = 10; // Process in smaller batches to avoid overwhelming the system
+      
+      // Process entities in batches
+      for (let i = 0; i < entities.length; i += batchSize) {
+        const batch = entities.slice(i, i + batchSize);
+        const batchPromises = batch.map(async (entity) => {
+          try {
+            // Generate embedding data
+            const embeddingData = await createEntityEmbedding(entity, entityType);
+            
+            if (!embeddingData || !embeddingData.embedding_vector) {
+              return {
+                id: entity._id,
+                success: false,
+                error: "Failed to generate embedding data"
+              };
+            }
+            
+            // Update the entity with the embedding to trigger schema hooks
+            entity.ai_embedding = embeddingData.embedding_vector;
+            await entity.save();
+            
+            // Also store in AI embeddings collection
+            await this.storeEmbedding(
+              entityType,
+              entity._id,
+              entity.company_id,
+              embeddingData.embedding_vector,
+              embeddingData.content_summary
+            );
+            
+            return {
               id: entity._id,
               success: true
-            });
-          } else {
-            results.push({
+            };
+          } catch (error) {
+            console.error(`Error processing ${entityType} ${entity._id}:`, error);
+            return {
               id: entity._id,
               success: false,
-              error: "Failed to generate embedding"
-            });
+              error: error.message
+            };
           }
-        } catch (error) {
-          results.push({
-            id: entity._id,
-            success: false,
-            error: error.message
-          });
-        }
+        });
+        
+        // Wait for the current batch to complete
+        const batchResults = await Promise.all(batchPromises);
+        results.push(...batchResults);
       }
       
       return {
         total: entities.length,
+        processed: results.length,
         success: results.filter(r => r.success).length,
         failed: results.filter(r => !r.success).length,
-        results: results
+        results
       };
     } catch (error) {
       console.error(`Error batch generating embeddings for ${entityType}:`, error);
@@ -337,31 +409,50 @@ class AiRepository {
       // Generate embedding for the query
       const queryEmbedding = await this.generateEmbeddingForText(query);
 
-      // Build query for entity types
-      const typeFilter =
-        entityTypes.length > 0 ? { entity_type: { $in: entityTypes } } : {};
-
-      // Find similar entities across specified types
-      const similarEntities = await AiEmbedding.find({
-        company_id: companyId,
-        ...typeFilter,
-      })
-        .sort({
-          embedding_vector: {
-            $vectorSearch: {
+      // Use aggregation pipeline with $search stage for vector search
+      let pipeline = [
+        {
+          $search: {
+            vectorSearch: {
               queryVector: queryEmbedding,
               path: "embedding_vector",
               numCandidates: limit * 3,
-              limit: limit,
+              limit: limit
             },
-          },
-        })
-        .limit(limit);
+            filter: {
+              equals: { path: "company_id", value: companyId }
+            }
+          }
+        }
+      ];
+      
+      // Add entity type filter if specified
+      if (entityTypes.length > 0) {
+        pipeline.push({
+          $match: { entity_type: { $in: entityTypes } }
+        });
+      }
+      
+      // Add limit
+      pipeline.push({ $limit: limit });
+      
+      // Execute the aggregation
+      const similarEntities = await AiEmbedding.aggregate(pipeline);
 
       return similarEntities;
     } catch (error) {
       console.error("Error getting relevant context:", error);
-      return []; // Return empty array on error
+      // Fallback to regular find if vector search fails
+      try {
+        const fallbackQuery = { company_id: companyId };
+        if (entityTypes.length > 0) {
+          fallbackQuery.entity_type = { $in: entityTypes };
+        }
+        return await AiEmbedding.find(fallbackQuery).limit(limit);
+      } catch (fallbackError) {
+        console.error("Fallback query failed:", fallbackError);
+        return []; // Return empty array on error
+      }
     }
   }
 

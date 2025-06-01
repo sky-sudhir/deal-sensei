@@ -6,7 +6,7 @@ const aiEmbeddingSchema = new mongoose.Schema(
     entity_type: {
       type: String,
       required: true,
-      enum: ["deal", "contact", "activity", "file", "email_template"],
+      enum: ["deal", "contact", "activity", "file", "email_template", "objection"],
     },
     entity_id: {
       type: mongoose.Schema.Types.ObjectId,

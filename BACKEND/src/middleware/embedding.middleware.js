@@ -1,16 +1,17 @@
-import { generateAndStoreEmbedding } from "../utils/aiUtils.js";
+import { createEntityEmbedding } from "../utils/aiUtils.js";
 import { DealModel } from "../feature/deal/deal.schema.js";
 import { ContactModel } from "../feature/contact/contact.schema.js";
 import { ActivityModel } from "../feature/activity/activity.schema.js";
+import mongoose from "mongoose";
 
 /**
- * Middleware to generate and store embeddings for entities after they are created or updated
- * This middleware should be added to the relevant routes after the controller methods
+ * Middleware to ensure embedding generation for entities after they are created or updated
+ * This middleware is now a backup to the schema-level embedding generation
+ * It's useful for operations that bypass Mongoose hooks (like bulk operations)
  * @param {string} entityType - The type of entity (deal, contact, activity)
  * @returns {Function} - Express middleware function
  */
 export const generateEmbeddingMiddleware = (entityType) => {
-  console.log(entityType, "entityType");
   return async (req, res, next) => {
     try {
       // Skip if no response data or if it's not a success response
@@ -36,18 +37,21 @@ export const generateEmbeddingMiddleware = (entityType) => {
           console.error(`Unsupported entity type: ${entityType}`);
           return next();
       }
-      console.log(model, entityType, entity, "qqqqqqqqqqqqqq");
-      // Generate embedding asynchronously (don't wait for it to complete)
-      generateAndStoreEmbedding(entity, entityType, model)
-        .then((embedding) => {
-          console.log(`Generated embedding for ${entityType} ${entity._id}`);
-        })
-        .catch((error) => {
-          console.error(
-            `Error generating embedding for ${entityType} ${entity._id}:`,
-            error
-          );
-        });
+      
+      // Check if the entity already has embeddings
+      if (!entity.ai_embedding || entity.ai_embedding.length === 0) {
+        console.log(`Backup middleware: Generating embedding for ${entityType} ${entity._id}`);
+        
+        // Generate embedding
+        const embeddingData = await createEntityEmbedding(entity, entityType);
+        if (embeddingData && embeddingData.embedding_vector) {
+          // Update the entity with the embedding vector
+          await model.findByIdAndUpdate(entity._id, { 
+            ai_embedding: embeddingData.embedding_vector 
+          });
+          console.log(`Backup middleware: Generated embedding for ${entityType} ${entity._id}`);
+        }
+      }
 
       // Continue with the response
       return next();

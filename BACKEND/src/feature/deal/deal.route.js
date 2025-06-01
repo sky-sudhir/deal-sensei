@@ -40,7 +40,7 @@ router.get(
 
 // Update deal
 router.put(
-  "/:deal_id",
+  "/:id",
   authorize(["admin", "sales_rep"]),
   dealIdValidator,
   dealUpdateValidator,

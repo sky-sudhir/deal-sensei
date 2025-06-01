@@ -18,10 +18,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 const DealCoach = ({ dealId }) => {
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const { data, loading, error } = useQuery(`${API_DEAL_COACH}${dealId}`, {
+  const {
+    data: d,
+    loading,
+    error,
+  } = useQuery(`${API_DEAL_COACH}${dealId}`, {
     skip: !dealId,
     key: refreshKey,
   });
+  const data = d?.data?.data;
 
   const handleRefresh = () => {
     setRefreshKey((prev) => prev + 1);
@@ -157,12 +162,6 @@ const DealCoach = ({ dealId }) => {
                   <h3 className="font-medium mb-2">Stage Analysis</h3>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <p className="text-muted-foreground">Current Stage</p>
-                      <p className="font-medium">
-                        {stage_analysis.current_stage}
-                      </p>
-                    </div>
-                    <div>
                       <p className="text-muted-foreground">Days in Stage</p>
                       <p className="font-medium flex items-center">
                         {stage_analysis.days_in_stage}
@@ -173,13 +172,30 @@ const DealCoach = ({ dealId }) => {
                         )}
                       </p>
                     </div>
-                    <div>
-                      <p className="text-muted-foreground">Average Time</p>
-                      <p className="font-medium">
-                        {stage_analysis.average_days_in_stage} days
-                      </p>
-                    </div>
+                    {stage_analysis.average_days_in_stage && (
+                      <div>
+                        <p className="text-muted-foreground">Average Time</p>
+                        <p className="font-medium">
+                          {stage_analysis.average_days_in_stage} days
+                        </p>
+                      </div>
+                    )}
                   </div>
+                  
+                  {/* Next Steps */}
+                  {stage_analysis.next_steps && stage_analysis.next_steps.length > 0 && (
+                    <div className="mt-4">
+                      <p className="text-muted-foreground mb-2">Recommended Next Steps</p>
+                      <ul className="space-y-2">
+                        {stage_analysis.next_steps.map((step, index) => (
+                          <li key={index} className="flex items-start gap-2 text-sm">
+                            <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                            <span>{step}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -195,28 +211,42 @@ const DealCoach = ({ dealId }) => {
                       </p>
                     </div>
                     <div>
-                      <p className="text-muted-foreground">Recent Activity</p>
+                      <p className="text-muted-foreground">Engagement Quality</p>
                       <p className="font-medium flex items-center">
-                        {activity_analysis.recent_activity ? (
+                        {activity_analysis.engagement_quality === "Low" ? (
                           <>
-                            <CheckCircle2 className="h-4 w-4 text-green-500 mr-1" />
-                            Yes
+                            <AlertCircle className="h-4 w-4 text-amber-500 mr-1" />
+                            Low
+                          </>
+                        ) : activity_analysis.engagement_quality === "Medium" ? (
+                          <>
+                            <CheckCircle2 className="h-4 w-4 text-amber-500 mr-1" />
+                            Medium
                           </>
                         ) : (
                           <>
-                            <AlertCircle className="h-4 w-4 text-amber-500 mr-1" />
-                            No
+                            <CheckCircle2 className="h-4 w-4 text-green-500 mr-1" />
+                            High
                           </>
                         )}
                       </p>
                     </div>
-                    <div>
-                      <p className="text-muted-foreground">Activity Trend</p>
-                      <p className="font-medium capitalize">
-                        {activity_analysis.activity_trend}
-                      </p>
-                    </div>
                   </div>
+                  
+                  {/* Suggested Activities */}
+                  {activity_analysis.suggested_activities && activity_analysis.suggested_activities.length > 0 && (
+                    <div className="mt-4">
+                      <p className="text-muted-foreground mb-2">Suggested Activities</p>
+                      <ul className="space-y-2">
+                        {activity_analysis.suggested_activities.map((activity, index) => (
+                          <li key={index} className="flex items-start gap-2 text-sm">
+                            <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                            <span>{activity}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

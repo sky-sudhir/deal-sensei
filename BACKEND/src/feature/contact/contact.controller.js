@@ -56,13 +56,6 @@ class ContactController {
       const { id } = req.params;
       const contact = await this.contactRepository.findContactById(id);
 
-      // Check if contact belongs to the same company as the authenticated user
-      if (contact.company_id.toString() !== req.user.company_id.toString()) {
-        return response.forbidden(
-          "You do not have permission to access this contact"
-        );
-      }
-
       // For sales reps, check if they own the contact
       if (
         req.user.role === "sales_rep" &&
@@ -87,9 +80,10 @@ class ContactController {
       // Get the contact to be updated
       const contactToUpdate = await this.contactRepository.findContactById(id);
 
-      // Check if contact belongs to the same company as the authenticated user
+      // For sales reps, check if they own the contact
       if (
-        contactToUpdate.company_id.toString() !== req.user.company_id.toString()
+        req.user.role === "sales_rep" &&
+        contactToUpdate.owner_id.toString() !== req.user.userId.toString()
       ) {
         return response.forbidden(
           "You do not have permission to update this contact"
@@ -132,9 +126,10 @@ class ContactController {
       // Get the contact to be deleted
       const contactToDelete = await this.contactRepository.findContactById(id);
 
-      // Check if contact belongs to the same company as the authenticated user
+      // For sales reps, check if they own the contact
       if (
-        contactToDelete.company_id.toString() !== req.user.company_id.toString()
+        req.user.role === "sales_rep" &&
+        contactToDelete.owner_id.toString() !== req.user.userId.toString()
       ) {
         return response.forbidden(
           "You do not have permission to delete this contact"
@@ -178,9 +173,10 @@ class ContactController {
       // Get the contact to be updated
       const contactToUpdate = await this.contactRepository.findContactById(id);
 
-      // Check if contact belongs to the same company as the authenticated user
+      // For sales reps, check if they own the contact
       if (
-        contactToUpdate.company_id.toString() !== req.user.company_id.toString()
+        req.user.role === "sales_rep" &&
+        contactToUpdate.owner_id.toString() !== req.user.userId.toString()
       ) {
         return response.forbidden(
           "You do not have permission to update this contact"

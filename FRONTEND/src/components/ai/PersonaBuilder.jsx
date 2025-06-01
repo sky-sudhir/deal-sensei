@@ -17,13 +17,15 @@ import { Separator } from "@/components/ui/separator";
 const PersonaBuilder = ({ contactId }) => {
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const { data, loading, error } = useQuery(
-    `${API_PERSONA_BUILDER}${contactId}`,
-    {
-      skip: !contactId,
-      key: refreshKey,
-    }
-  );
+  const {
+    data: d,
+    loading,
+    error,
+  } = useQuery(`${API_PERSONA_BUILDER}${contactId}`, {
+    skip: !contactId,
+    key: refreshKey,
+  });
+  const data = d?.data?.data;
 
   const handleRefresh = () => {
     setRefreshKey((prev) => prev + 1);

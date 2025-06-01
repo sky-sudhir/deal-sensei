@@ -8,7 +8,10 @@ class ContactRepository {
       return contact;
     } catch (error) {
       if (error.code === 11000) {
-        throw new CustomError("A contact with this email already exists in your company", 400);
+        throw new CustomError(
+          "A contact with this email already exists in your company",
+          400
+        );
       }
       throw new CustomError(error);
     }
@@ -16,12 +19,14 @@ class ContactRepository {
 
   async findContactById(contactId) {
     try {
-      const contact = await ContactModel.findById(contactId);
-      
+      const contact = await ContactModel.findById(contactId)
+        .populate("owner_id", "name email")
+        .populate("company_id", "name");
+
       if (!contact) {
         throw new CustomError("Contact not found", 404);
       }
-      
+
       return contact;
     } catch (error) {
       throw new CustomError(error);
@@ -32,42 +37,42 @@ class ContactRepository {
     try {
       const { search, limit = 10, page = 1, ownerId } = options;
       const skip = (page - 1) * limit;
-      
+
       // Base query
       const query = { company_id: companyId };
-      
+
       // Add owner filter if provided (for sales reps)
       if (ownerId) {
         query.owner_id = ownerId;
       }
-      
+
       // Add search filter if provided
       if (search) {
         query.$or = [
-          { name: { $regex: search, $options: 'i' } },
-          { email: { $regex: search, $options: 'i' } },
-          { phone: { $regex: search, $options: 'i' } },
-          { notes: { $regex: search, $options: 'i' } }
+          { name: { $regex: search, $options: "i" } },
+          { email: { $regex: search, $options: "i" } },
+          { phone: { $regex: search, $options: "i" } },
+          { notes: { $regex: search, $options: "i" } },
         ];
       }
-      
+
       // Execute query with pagination
       const contacts = await ContactModel.find(query)
         .sort({ name: 1 })
         .skip(skip)
         .limit(limit);
-      
+
       // Get total count for pagination
       const total = await ContactModel.countDocuments(query);
-      
+
       return {
         contacts,
         pagination: {
           total,
           page: parseInt(page),
           limit: parseInt(limit),
-          pages: Math.ceil(total / limit)
-        }
+          pages: Math.ceil(total / limit),
+        },
       };
     } catch (error) {
       throw new CustomError(error);
@@ -81,15 +86,18 @@ class ContactRepository {
         updateData,
         { new: true, runValidators: true }
       );
-      
+
       if (!updatedContact) {
         throw new CustomError("Contact not found", 404);
       }
-      
+
       return updatedContact;
     } catch (error) {
       if (error.code === 11000) {
-        throw new CustomError("A contact with this email already exists in your company", 400);
+        throw new CustomError(
+          "A contact with this email already exists in your company",
+          400
+        );
       }
       throw new CustomError(error);
     }
@@ -98,11 +106,11 @@ class ContactRepository {
   async deleteContact(contactId) {
     try {
       const deletedContact = await ContactModel.findByIdAndDelete(contactId);
-      
+
       if (!deletedContact) {
         throw new CustomError("Contact not found", 404);
       }
-      
+
       return { message: "Contact deleted successfully" };
     } catch (error) {
       throw new CustomError(error);

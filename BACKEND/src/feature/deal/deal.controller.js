@@ -331,8 +331,11 @@ class DealController {
       // Validate that the contact exists and belongs to the company
       const contact = await this.contactRepository.findContactById(contactId);
 
+      console.log(contact, req.user, "qqqqqqq");
       // Check if contact belongs to the same company as the authenticated user
-      if (contact.company_id.toString() !== req.user.company_id.toString()) {
+      if (
+        contact.company_id._id.toString() !== req.user.company_id.toString()
+      ) {
         return response.forbidden(
           "You do not have permission to access this contact's deals"
         );
@@ -341,7 +344,7 @@ class DealController {
       // For sales reps, check if they own the contact
       if (
         req.user.role === "sales_rep" &&
-        contact.owner_id.toString() !== req.user.userId.toString()
+        contact.owner_id._id.toString() !== req.user.userId.toString()
       ) {
         return response.forbidden(
           "You do not have permission to access this contact's deals"
@@ -362,21 +365,29 @@ class DealController {
       const { new_owner_id } = req.body;
 
       if (!new_owner_id) {
-        return response.badRequest('New owner ID is required');
+        return response.badRequest("New owner ID is required");
       }
 
       // First check if the deal exists and belongs to the company
       const deal = await this.dealRepository.findDealById(id);
-      
+
       // Verify company ownership
-      if (deal.company_id.toString() !== req.user.company_id.toString()) {
-        return response.forbidden('You do not have permission to transfer this deal');
+      if (deal.company_id._id.toString() !== req.user.company_id.toString()) {
+        return response.forbidden(
+          "You do not have permission to transfer this deal"
+        );
       }
 
       // Transfer ownership
-      const updatedDeal = await this.dealRepository.transferOwnership(id, new_owner_id);
-      
-      return response.success(updatedDeal, 'Deal ownership transferred successfully');
+      const updatedDeal = await this.dealRepository.transferOwnership(
+        id,
+        new_owner_id
+      );
+
+      return response.success(
+        updatedDeal,
+        "Deal ownership transferred successfully"
+      );
     } catch (error) {
       next(error);
     }

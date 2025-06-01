@@ -175,7 +175,7 @@ const ContactDetail = () => {
               <div>
                 <p className="text-sm font-medium">Owner</p>
                 <p className="text-sm">
-                  {contact.owner?.name || "Not assigned"}
+                  {contact.owner_id?.name || "Not assigned"}
                 </p>
               </div>
             </div>
@@ -285,7 +285,7 @@ const ContactDetail = () => {
           <div className="space-y-6">
             {/* Persona Builder */}
             <PersonaBuilder contactId={id} />
-            
+
             {/* Objection Handler */}
             <ObjectionHandler />
           </div>
