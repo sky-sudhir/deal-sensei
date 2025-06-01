@@ -94,6 +94,12 @@ export const API_FILE_DETAILS = "api/v1/files/";
 export const API_FILE_DELETE = "api/v1/files/";
 export const API_FILES_BY_ENTITY = "api/v1/files/entity/";
 
+// AI capabilities endpoints
+export const API_DEAL_COACH = "api/v1/ai/deal-coach/";
+export const API_PERSONA_BUILDER = "api/v1/ai/persona-builder/";
+export const API_OBJECTION_HANDLER = "api/v1/ai/objection-handler";
+export const API_WIN_LOSS_EXPLAINER = "api/v1/ai/win-loss-explainer/";
+
 // Legacy endpoints (can be removed if not needed)
 export const CASE_STUDY = "case-studies";
 export const CASE_STUDIES_ME = "case-studies";

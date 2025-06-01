@@ -6,6 +6,7 @@ import {
   contactIdValidator,
 } from "./contact.validator.js";
 import { authenticate, authorize } from "../../middleware/auth.middleware.js";
+import { generateContactEmbedding } from "../../middleware/embedding.middleware.js";
 
 const router = express.Router();
 const contactController = new ContactController();
@@ -18,7 +19,8 @@ router.post(
   "/",
   authorize(["admin", "sales_rep"]),
   contactCreateValidator,
-  contactController.createContact.bind(contactController)
+  contactController.createContact.bind(contactController),
+  generateContactEmbedding
 );
 
 // Get all contacts for the company (with pagination and search)
@@ -42,7 +44,8 @@ router.put(
   authorize(["admin", "sales_rep"]),
   contactIdValidator,
   contactUpdateValidator,
-  contactController.updateContact.bind(contactController)
+  contactController.updateContact.bind(contactController),
+  generateContactEmbedding
 );
 
 // Delete contact

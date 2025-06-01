@@ -30,6 +30,9 @@ import EditActivityPage from "./activities/EditActivityPage";
 // Files Management
 import FilesPage from "./files/FilesPage";
 
+// AI Tools
+import AiToolsPage from "./ai/AiToolsPage";
+
 // Protected Routes for AppLayout
 const HomeRoutes = [
   /* Dashboard */
@@ -62,8 +65,12 @@ const HomeRoutes = [
   /* Files Management */
   <Route key="files" path="files" element={<FilesPage />} />,
 
+  /* AI Tools */
+  <Route key="ai-tools" path="ai-tools" element={<AiToolsPage />} />,
+
   /* Default Route */
-  <Route key="default" path="" element={<Navigate to="/dashboard" replace />} />,
+  <Route key="default" path="*" element={<Navigate to="/dashboard" />} />,
+
 ];
 
 export default HomeRoutes;
