@@ -51,13 +51,13 @@ const FileList = ({ entityType, entityId }) => {
   // Get appropriate icon based on file type
   const getFileIcon = (fileType) => {
     if (fileType.startsWith("image/")) {
-      return <FileImageIcon className="h-5 w-5" />;
+      return <FileImageIcon className="h-5 w-5 hover:text-foreground" />;
     } else if (fileType === "application/pdf") {
-      return <FileIcon className="h-5 w-5" />;
+      return <FileIcon className="h-5 w-5 hover:text-foreground" />;
     } else if (fileType.startsWith("text/")) {
-      return <FileTextIcon className="h-5 w-5" />;
+      return <FileTextIcon className="h-5 w-5 hover:text-foreground" />;
     } else {
-      return <FileIcon className="h-5 w-5" />;
+      return <FileIcon className="h-5 w-5 hover:text-foreground" />;
     }
   };
 
@@ -155,7 +155,7 @@ const FileList = ({ entityType, entityId }) => {
                         onClick={() => handleDownload(file)}
                         title="Download"
                       >
-                        <DownloadIcon className="h-4 w-4" />
+                        <DownloadIcon className="h-4 w-4 hover:text-foreground" />
                       </Button>
                       <Button
                         variant="ghost"
@@ -163,7 +163,7 @@ const FileList = ({ entityType, entityId }) => {
                         onClick={() => handleDeleteClick(file)}
                         title="Delete"
                       >
-                        <TrashIcon className="h-4 w-4" />
+                        <TrashIcon className="h-4 w-4 hover:text-foreground" />
                       </Button>
                     </div>
                   </div>

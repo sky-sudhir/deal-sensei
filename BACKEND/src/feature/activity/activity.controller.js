@@ -45,7 +45,7 @@ class ActivityController {
 
     try {
       const { user } = req;
-      const { type, deal_id, contact_id, user_id, page, limit, sort } =
+      const { type, deal_id, contact_id, user_id, page, limit, sort, search } =
         req.query;
 
       // Build filters object
@@ -67,6 +67,7 @@ class ActivityController {
         page: parseInt(page, 10) || 1,
         limit: parseInt(limit, 10) || 10,
         sort: sort || "-created_at",
+        search
       };
 
       const result = await this.repository.getActivities(filters, options);

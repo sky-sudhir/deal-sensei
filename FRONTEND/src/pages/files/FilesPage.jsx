@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import useQuery from "../../hooks/useQuery";
 import {
   API_FILES_LIST,
@@ -33,6 +33,7 @@ const FilesPage = () => {
     file_type: "",
   });
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
 
   // Fetch deals for filter dropdown
   const { data: dealsData } = useQuery(API_DEALS_LIST);
@@ -40,20 +41,34 @@ const FilesPage = () => {
   // Fetch contacts for filter dropdown
   const { data: contactsData } = useQuery(API_CONTACTS_LIST);
 
-  // Build query params for files
-  const queryParams = {
-    page,
-    limit,
-    ...(filters.entity_type &&
-      filters.entity_id && {
-        attached_to_type: filters.entity_type,
-        attached_to_id: filters.entity_id,
-      }),
-    // ...(filters.file_type && { file_type: filters.file_type }),
-    ...(searchQuery && { search: searchQuery }),
-  };
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500); // 500ms debounce delay
 
-  console.log("queryParams", queryParams);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Build query params for files
+  const buildQueryParams = useCallback(() => {
+    const params = {
+      page,
+      limit,
+      ...(filters.entity_type !== "__all" &&
+        filters.entity_type &&
+        filters.entity_id && {
+          attached_to_type: filters.entity_type,
+          attached_to_id: filters.entity_id,
+        }),
+      // ...(filters.file_type && { file_type: filters.file_type }),
+      ...(debouncedSearchQuery && { search: debouncedSearchQuery }),
+    };
+    return params;
+  }, [page, limit, filters, debouncedSearchQuery]);
+
+  // Generate query params string
+  const queryParams = buildQueryParams();
   // Fetch files
   const {
     data: filesData,
@@ -85,6 +100,8 @@ const FilesPage = () => {
       file_type: "",
     });
     setSearchQuery("");
+    setDebouncedSearchQuery("");
+    setPage(1);
   };
 
   // Get entity options based on selected entity type
@@ -215,6 +232,11 @@ const FilesPage = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
+                {searchQuery && searchQuery !== debouncedSearchQuery && (
+                  <div className="absolute right-2.5 top-2.5">
+                    <div className="animate-spin h-4 w-4 border-2 border-primary rounded-full border-t-transparent"></div>
+                  </div>
+                )}
               </div>
             </div>
             <Button

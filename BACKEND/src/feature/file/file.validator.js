@@ -40,6 +40,7 @@ const fileIdSchema = Joi.object({
 const querySchema = Joi.object({
   attached_to_type: Joi.string().valid("deal", "contact", "activity"),
   attached_to_id: Joi.string().custom(objectIdValidator),
+  search: Joi.string().trim().allow(''),
   page: Joi.number().integer().min(1).default(1),
   limit: Joi.number().integer().min(1).max(100).default(10),
   sort: Joi.string().valid("created_at", "-created_at").default("-created_at"),

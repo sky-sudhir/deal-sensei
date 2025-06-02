@@ -9,12 +9,14 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from "../ui/dialog";
 import { API_FILES_UPLOAD } from "../../imports/api";
 import axios from "axios";
-import { UploadIcon, XIcon } from "lucide-react";
+import { UploadCloud, X, FileIcon, AlertCircle, CheckCircle2 } from "lucide-react";
 import { showToast } from "@/utils/toast";
 import { getToken } from "@/imports/localStorage";
+import { cn } from "@/lib/utils";
 
 const FileUpload = ({ isOpen, onClose, onSuccess, entityType, entityId }) => {
   const [file, setFile] = useState(null);
@@ -106,63 +108,99 @@ const FileUpload = ({ isOpen, onClose, onSuccess, entityType, entityId }) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px]" onClose={handleClose}>
         <DialogHeader>
-          <DialogTitle>Upload File</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <UploadCloud className="h-5 w-5 text-primary" />
+            Upload File
+          </DialogTitle>
+          <DialogDescription>
+            Upload a file to attach to this {entityType?.toLowerCase() || "item"}.
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="file">Select File</Label>
-            <div className="flex items-center gap-2">
+        <div className="space-y-6 py-4">
+          {!file ? (
+            <div 
+              className={cn(
+                "border-2 border-dashed rounded-lg p-8 transition-colors",
+                "hover:border-primary/50 hover:bg-muted/30 cursor-pointer",
+                "flex flex-col items-center justify-center text-center"
+              )}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <UploadCloud className="h-10 w-10 text-muted-foreground mb-4" />
+              <div className="space-y-1">
+                <p className="text-sm font-medium">Drag & drop or click to upload</p>
+                <p className="text-xs text-muted-foreground">
+                  Supports documents, images, and other file types
+                </p>
+              </div>
               <Input
                 ref={fileInputRef}
                 id="file"
                 type="file"
                 onChange={handleFileChange}
                 disabled={isUploading}
-                className="flex-1"
+                className="hidden"
               />
-              {file && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleClearFile}
-                  disabled={isUploading}
-                >
-                  <XIcon className="h-4 w-4" />
-                </Button>
-              )}
             </div>
-          </div>
-
-          {file && (
-            <div className="space-y-2 p-3 border rounded-md bg-muted/20">
-              <p className="text-sm font-medium">{file.name}</p>
-              <p className="text-xs text-muted-foreground">
-                {formatFileSize(file.size)} • {file.type || "Unknown type"}
-              </p>
-            </div>
-          )}
-
-          {isUploading && (
-            <div className="space-y-2">
-              <div className="flex justify-between text-xs">
-                <span>Uploading...</span>
-                <span>{uploadProgress}%</span>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex items-start gap-3 p-4 border rounded-md bg-muted/10">
+                <FileIcon className="h-8 w-8 text-primary flex-shrink-0 mt-1" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-medium truncate">{file.name}</p>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={handleClearFile}
+                      disabled={isUploading}
+                      className="h-7 w-7"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {formatFileSize(file.size)} • {file.type || "Unknown type"}
+                  </p>
+                </div>
               </div>
-              <Progress value={uploadProgress} />
+              
+              {isUploading && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="flex items-center gap-1.5">
+                      <span className="inline-block h-2 w-2 rounded-full bg-primary animate-pulse"></span>
+                      <span>Uploading file...</span>
+                    </span>
+                    <span className="font-medium">{uploadProgress}%</span>
+                  </div>
+                  <Progress value={uploadProgress} className="h-2" />
+                </div>
+              )}
+              
+              {!isUploading && (
+                <div className="text-xs text-muted-foreground italic">
+                  <div className="flex items-center gap-1.5">
+                    <AlertCircle className="h-3.5 w-3.5" />
+                    <span>Click Upload when you're ready to proceed</span>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="gap-2 sm:gap-0">
           <Button
             type="button"
             variant="outline"
             onClick={handleClose}
             disabled={isUploading}
+            className="flex-1 sm:flex-none"
           >
             Cancel
           </Button>
@@ -170,10 +208,20 @@ const FileUpload = ({ isOpen, onClose, onSuccess, entityType, entityId }) => {
             type="button"
             onClick={handleUpload}
             disabled={!file || isUploading}
-            className="gap-2"
+            className="gap-2 flex-1 sm:flex-none"
+            variant={file ? "default" : "outline"}
           >
-            <UploadIcon className="h-4 w-4" />
-            {isUploading ? "Uploading..." : "Upload"}
+            {isUploading ? (
+              <>
+                <span className="inline-block h-4 w-4 rounded-full border-2 border-current border-r-transparent animate-spin"></span>
+                Uploading...
+              </>
+            ) : (
+              <>
+                <UploadCloud className="h-4 w-4" />
+                Upload
+              </>
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

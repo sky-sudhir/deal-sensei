@@ -71,7 +71,9 @@ class AiController {
         throw new CustomError("Deal not found", 404);
       }
 
-      if (deal.company_id.toString() !== company_id.toString()) {
+      // Handle both populated and unpopulated company_id fields
+      const dealCompanyId = deal.company_id._id ? deal.company_id._id.toString() : deal.company_id.toString();
+      if (dealCompanyId !== company_id.toString()) {
         throw new CustomError("You don't have access to this deal", 403);
       }
 
@@ -150,7 +152,9 @@ class AiController {
         throw new CustomError("Contact not found", 404);
       }
 
-      if (contact.company_id.toString() !== company_id.toString()) {
+      // Handle both populated and unpopulated company_id fields
+      const contactCompanyId = contact.company_id._id ? contact.company_id._id.toString() : contact.company_id.toString();
+      if (contactCompanyId !== company_id.toString()) {
         throw new CustomError("You don't have access to this contact", 403);
       }
 
@@ -248,7 +252,9 @@ class AiController {
           throw new CustomError("Deal not found", 404);
         }
 
-        if (deal.company_id.toString() !== company_id.toString()) {
+        // Handle both populated and unpopulated company_id fields
+        const dealCompanyId = deal.company_id._id ? deal.company_id._id.toString() : deal.company_id.toString();
+        if (dealCompanyId !== company_id.toString()) {
           throw new CustomError("You don't have access to this deal", 403);
         }
 
@@ -305,13 +311,29 @@ class AiController {
       const { deal_id } = req.params;
       const { company_id } = req.user;
 
+      if (!deal_id || !mongoose.Types.ObjectId.isValid(deal_id)) {
+        throw new CustomError("Invalid deal ID format", 400);
+      }
+
       // Check if deal exists and belongs to the company
       const deal = await this.dealRepository.findDealById(deal_id);
       if (!deal) {
         throw new CustomError("Deal not found", 404);
       }
 
-      if (deal.company_id.toString() !== company_id.toString()) {
+      // Handle both populated and unpopulated company_id fields safely
+      let dealCompanyId;
+      try {
+        dealCompanyId = deal.company_id && deal.company_id._id 
+          ? deal.company_id._id.toString() 
+          : deal.company_id.toString();
+      } catch (error) {
+        console.error("Error extracting company ID from deal:", error);
+        throw new CustomError("Invalid deal data structure", 500);
+      }
+
+      // Verify company access
+      if (dealCompanyId !== company_id.toString()) {
         throw new CustomError("You don't have access to this deal", 403);
       }
 
@@ -325,22 +347,44 @@ class AiController {
 
       // Ensure the deal has an embedding
       if (!deal.ai_embedding || deal.ai_embedding.length === 0) {
-        // Generate and store embedding for the deal
-        await this.aiRepository.generateAndStoreEmbeddingForDeal(deal);
+        try {
+          // Generate and store embedding for the deal
+          await this.aiRepository.generateAndStoreEmbeddingForDeal(deal);
+        } catch (embeddingError) {
+          console.error("Error generating embedding for deal:", embeddingError);
+          // Continue without embedding - we'll use non-vector methods
+        }
       }
 
-      // Get deal data for analysis
-      const dealData = await this.aiRepository.getDealDataForAnalysis(
-        deal_id,
-        company_id
-      );
+      // Get deal data for analysis with error handling
+      let dealData;
+      try {
+        dealData = await this.aiRepository.getDealDataForAnalysis(
+          deal_id,
+          company_id
+        );
+        
+        if (!dealData) {
+          throw new Error("Failed to retrieve deal data for analysis");
+        }
+      } catch (dataError) {
+        console.error("Error retrieving deal data for analysis:", dataError);
+        throw new CustomError("Failed to retrieve necessary deal data", 500);
+      }
 
       // Get relevant context using vector similarity search
-      const relevantContext = await this.aiRepository.getRelevantContextForDeal(
-        deal,
-        company_id
-      );
-      dealData.relevantContext = relevantContext;
+      try {
+        const relevantContext = await this.aiRepository.getRelevantContextForDeal(
+          deal,
+          company_id
+        );
+        dealData.relevantContext = relevantContext || [];
+      } catch (contextError) {
+        console.error("Error retrieving context for deal:", contextError);
+        // Continue without context if it fails
+        dealData.relevantContext = [];
+        dealData.contextError = "Could not retrieve similar deals context";
+      }
 
       // Generate AI analysis
       let winLossAnalysis;
@@ -358,13 +402,29 @@ class AiController {
           "AI service unavailable, showing rule-based analysis";
       }
 
+      // Add metadata to help frontend display appropriate messages
+      winLossAnalysis.deal_status = deal.status;
+      winLossAnalysis.deal_title = deal.title;
+      winLossAnalysis.deal_value = deal.value;
+      winLossAnalysis.analysis_date = new Date().toISOString();
+
       return response.success(
         winLossAnalysis,
         "Win-loss analysis generated successfully"
       );
     } catch (error) {
       console.error("Error in getWinLossExplainer:", error);
-      next(error);
+      
+      // Handle specific error types with appropriate status codes
+      if (error instanceof CustomError) {
+        return next(error);
+      } else if (error.name === "CastError") {
+        return next(new CustomError("Invalid ID format", 400));
+      } else if (error.name === "ValidationError") {
+        return next(new CustomError("Validation error: " + error.message, 400));
+      }
+      
+      next(new CustomError("Failed to generate win-loss analysis", 500));
     }
   }
 
