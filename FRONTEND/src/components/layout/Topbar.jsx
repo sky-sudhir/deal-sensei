@@ -80,14 +80,14 @@ const Topbar = ({ toggleSidebar, isSidebarOpen, isMobile }) => {
           {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
         </Button>
 
-        <div className="flex relative max-w-md z-10">
+        {/* <div className="flex relative max-w-md z-10">
           <Input
             type="text"
             placeholder="Search..."
             className="pl-10 w-[200px] focus:w-[280px] transition-all duration-300 shadow-sm hover:shadow"
             icon={Search}
           />
-        </div>
+        </div> */}
       </div>
 
       {/* Right section with notifications, theme toggle, and profile */}
@@ -103,15 +103,6 @@ const Topbar = ({ toggleSidebar, isSidebarOpen, isMobile }) => {
           ) : (
             <Moon size={20} className="text-indigo-400" />
           )}
-        </Button>
-
-        <Button
-          variant="ghost"
-          size="icon"
-          className="rounded-full relative hover:bg-muted/80 shadow-sm"
-        >
-          <Bell size={20} />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full shadow-[0_0_4px_rgba(var(--primary)/0.7)]"></span>
         </Button>
 
         <DropdownMenu>
@@ -146,19 +137,6 @@ const Topbar = ({ toggleSidebar, isSidebarOpen, isMobile }) => {
                 </p>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link to="/profile" className="flex items-center gap-2">
-                <User size={16} className="text-muted-foreground" />
-                <span>Profile</span>
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to="/settings" className="flex items-center gap-2">
-                <SettingsIcon size={16} className="text-muted-foreground" />
-                <span>Settings</span>
-              </Link>
-            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => dispatch(logout())}

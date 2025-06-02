@@ -34,8 +34,7 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
 
-const ActivityList = ({ deal_id = null, contact_id = null }) => {
-  console.log(deal_id, contact_id, "qqqqqqqqqq");
+const ActivityList = ({ deal_id = null, contact_id = null, apiUrl = null }) => {
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [type, setType] = useState("");
@@ -48,15 +47,16 @@ const ActivityList = ({ deal_id = null, contact_id = null }) => {
   const queryParams = {
     page,
     limit,
-    ...(type && { type }),
+    ...(type && type !== "all" && { type }),
     ...(deal_id && deal_id !== "all" && { deal_id }),
     ...(contact_id && contact_id !== "all" && { contact_id }),
   };
 
+  // Determine the URL to use for fetching activities
+  const url = apiUrl || `${API_ACTIVITIES_LIST}?${generateParam(queryParams)}`;
+
   // Fetch activities
-  const { data, isLoading, refetch } = useQuery(
-    `${API_ACTIVITIES_LIST}?${generateParam(queryParams)}`
-  );
+  const { data, isLoading, refetch } = useQuery(url);
 
   // Delete activity mutation
   const { mutate: deleteActivity, isLoading: isDeleting } = useMutation();
@@ -112,28 +112,30 @@ const ActivityList = ({ deal_id = null, contact_id = null }) => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Activities</h2>
-        <Button onClick={() => navigate("/activities/new")}>
+        {/* <Button onClick={() => navigate("/activities/new")}>
           Log Activity
-        </Button>
+        </Button> */}
       </div>
 
-      <div className="flex flex-wrap gap-4 mb-4">
-        <div className="w-full md:w-auto">
-          <Select value={type} onValueChange={setType}>
-            <SelectTrigger className="w-full md:w-[180px]">
-              <SelectValue placeholder="Filter by type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="call">Call</SelectItem>
-              <SelectItem value="email">Email</SelectItem>
-              <SelectItem value="meeting">Meeting</SelectItem>
-              <SelectItem value="note">Note</SelectItem>
-              <SelectItem value="task">Task</SelectItem>
-            </SelectContent>
-          </Select>
+      {!apiUrl && (
+        <div className="flex flex-wrap gap-4 mb-4">
+          <div className="w-full md:w-auto">
+            <Select value={type} onValueChange={setType}>
+              <SelectTrigger className="w-full md:w-[180px]">
+                <SelectValue placeholder="Filter by type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="call">Call</SelectItem>
+                <SelectItem value="email">Email</SelectItem>
+                <SelectItem value="meeting">Meeting</SelectItem>
+                <SelectItem value="note">Note</SelectItem>
+                <SelectItem value="task">Task</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-      </div>
+      )}
 
       {isLoading ? (
         <div className="flex justify-center py-8">

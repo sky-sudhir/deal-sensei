@@ -219,7 +219,7 @@ const DealList = () => {
                       onClick={(e) => e.stopPropagation()}
                     >
                       <Button variant="ghost" size="icon">
-                        <MoreVertical className="h-4 w-4" />
+                        <MoreVertical className="h-4 w-4 hover:text-foreground" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent

@@ -25,7 +25,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   const location = useLocation();
   const [activeGroup, setActiveGroup] = useState(null);
   const { user } = useSelector((state) => state.user);
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === "admin";
 
   // Define sidebar navigation items
   const sidebarItems = [
@@ -33,18 +33,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       title: "Overview",
       items: [
         {
-          name: "Home",
-          path: "/home",
-          icon: LayoutDashboard,
-        },
-        {
           name: "Dashboard",
           path: "/dashboard",
-          icon: PieChart,
-        },
-        {
-          name: "Analytics",
-          path: "/analytics",
           icon: PieChart,
         },
       ],
@@ -89,16 +79,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         },
       ],
     },
-    {
-      title: "Communication",
-      items: [
-        {
-          name: "Messages",
-          path: "/messages",
-          icon: MessageSquare,
-        },
-      ],
-    },
+
     {
       title: "AI Tools",
       items: [
@@ -109,18 +90,20 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         },
       ],
     },
-    ...(isAdmin ? [
-      {
-        title: "Administration",
-        items: [
+    ...(isAdmin
+      ? [
           {
-            name: "Team Management",
-            path: "/team",
-            icon: UserCog,
+            title: "Administration",
+            items: [
+              {
+                name: "Team Management",
+                path: "/team",
+                icon: UserCog,
+              },
+            ],
           },
-        ],
-      },
-    ] : []),
+        ]
+      : []),
   ];
 
   // Toggle sidebar group
@@ -225,32 +208,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             </div>
           ))}
         </nav>
-      </div>
-
-      {/* Settings */}
-      <div className="p-4 border-t border-border/40 bg-gradient-to-r from-background to-background/50">
-        <Link
-          to="/settings"
-          className={cn(
-            "flex items-center gap-3 px-4 py-2 text-sm rounded-md transition-all duration-200",
-            "hover:bg-muted/60",
-            isActive("/settings")
-              ? "bg-primary/10 text-primary font-medium"
-              : "text-foreground/80"
-          )}
-        >
-          <div
-            className={cn(
-              "p-1.5 rounded-md transition-colors",
-              isActive("/settings")
-                ? "bg-primary/20 text-primary shadow-sm"
-                : "bg-muted/40 text-muted-foreground hover:shadow-sm"
-            )}
-          >
-            <Settings size={16} />
-          </div>
-          <span>Settings</span>
-        </Link>
       </div>
 
       {/* Sidebar toggle for desktop */}

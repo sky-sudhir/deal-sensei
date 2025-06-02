@@ -64,7 +64,7 @@ const TransferDealModal = ({ isOpen, onClose, dealId, onTransferComplete }) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] pt-0">
+      <DialogContent className="sm:max-w-[425px] pt-0 p-4" onClose={onClose}>
         <DialogHeader className="pt-0">
           <DialogTitle>Transfer Deal Ownership</DialogTitle>
           <DialogDescription>

@@ -79,14 +79,14 @@ class FileController {
     const response = new Response(res);
     try {
       const { user } = req;
-      const { attached_to_type, attached_to_id, page, limit, sort } = req.query;
+      const { attached_to_type, attached_to_id, page, limit, sort, search } = req.query;
 
       const filters = { company_id: user.company_id };
 
       if (attached_to_type) filters.attached_to_type = attached_to_type;
       if (attached_to_id) filters.attached_to_id = attached_to_id;
 
-      const options = { page, limit, sort };
+      const options = { page, limit, sort, search };
       const result = await this.fileRepository.getFileAttachments(
         filters,
         options
