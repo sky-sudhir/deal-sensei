@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import useQuery from "../../hooks/useQuery";
+import useQuery, { generateParam } from "../../hooks/useQuery";
 import useMutation from "../../hooks/useMutation";
 import { API_ACTIVITIES_LIST, API_ACTIVITY_DELETE } from "../../imports/api";
 import { Button } from "../ui/button";
@@ -34,7 +34,8 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
 
-const ActivityList = ({ dealId = null, contactId = null }) => {
+const ActivityList = ({ deal_id = null, contact_id = null }) => {
+  console.log(deal_id, contact_id, "qqqqqqqqqq");
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [type, setType] = useState("");
@@ -48,12 +49,14 @@ const ActivityList = ({ dealId = null, contactId = null }) => {
     page,
     limit,
     ...(type && { type }),
-    ...(dealId && { deal_id: dealId }),
-    ...(contactId && { contact_id: contactId }),
+    ...(deal_id && deal_id !== "all" && { deal_id }),
+    ...(contact_id && contact_id !== "all" && { contact_id }),
   };
 
   // Fetch activities
-  const { data, isLoading, refetch } = useQuery(API_ACTIVITIES_LIST);
+  const { data, isLoading, refetch } = useQuery(
+    `${API_ACTIVITIES_LIST}?${generateParam(queryParams)}`
+  );
 
   // Delete activity mutation
   const { mutate: deleteActivity, isLoading: isDeleting } = useMutation();

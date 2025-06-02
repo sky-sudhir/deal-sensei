@@ -7,6 +7,7 @@ import contactRouter from "./src/feature/contact/contact.route.js";
 import dealRouter from "./src/feature/deal/deal.route.js";
 import activityRouter from "./src/feature/activity/activity.route.js";
 import fileRouter from "./src/feature/file/file.route.js";
+import aiRouter from "./src/feature/ai/ai.route.js";
 import cors from "cors";
 import "dotenv/config";
 
@@ -25,6 +26,7 @@ app.use("/api/v1/contacts", contactRouter);
 app.use("/api/v1/deals", dealRouter);
 app.use("/api/v1/activities", activityRouter);
 app.use("/api/v1/files", fileRouter);
+app.use("/api/v1/ai", aiRouter);
 
 // Health check endpoint
 app.get("/health", (req, res) => {

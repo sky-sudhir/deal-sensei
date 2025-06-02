@@ -6,6 +6,7 @@ import {
   dealIdValidator,
 } from "./deal.validator.js";
 import { authenticate, authorize } from "../../middleware/auth.middleware.js";
+import { generateDealEmbedding } from "../../middleware/embedding.middleware.js";
 
 const router = express.Router();
 const dealController = new DealController();
@@ -18,7 +19,8 @@ router.post(
   "/",
   authorize(["admin", "sales_rep"]),
   dealCreateValidator,
-  dealController.createDeal.bind(dealController)
+  dealController.createDeal.bind(dealController),
+  generateDealEmbedding
 );
 
 // Get all deals for the company (with pagination and search)
@@ -42,7 +44,8 @@ router.put(
   authorize(["admin", "sales_rep"]),
   dealIdValidator,
   dealUpdateValidator,
-  dealController.updateDeal.bind(dealController)
+  dealController.updateDeal.bind(dealController),
+  generateDealEmbedding
 );
 
 // Delete deal

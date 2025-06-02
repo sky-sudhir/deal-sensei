@@ -38,6 +38,7 @@ import { Badge } from "@/components/ui/badge";
 import { useSelector } from "react-redux";
 import ActivityList from "@/components/activities/ActivityList";
 import FileList from "@/components/files/FileList";
+import { DealCoach, WinLossExplainer, ObjectionHandler } from "@/components/ai";
 
 const DealDetail = () => {
   const { id } = useParams();
@@ -380,21 +381,18 @@ const DealDetail = () => {
         </TabsContent>
 
         <TabsContent value="ai-insights" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>AI Deal Coach</CardTitle>
-              <CardDescription>
-                AI-powered insights and recommendations to help close this deal
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-4">
-                <p className="text-muted-foreground">
-                  AI Deal Coach will be implemented in Phase 5.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="space-y-6">
+            {/* Deal Coach */}
+            <DealCoach dealId={id} />
+            
+            {/* Only show Win-Loss Explainer for closed deals */}
+            {deal.status === "won" || deal.status === "lost" ? (
+              <WinLossExplainer dealId={id} />
+            ) : null}
+            
+            {/* Objection Handler */}
+            <ObjectionHandler dealId={id} />
+          </div>
         </TabsContent>
       </Tabs>
     </div>

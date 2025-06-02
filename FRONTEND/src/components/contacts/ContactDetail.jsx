@@ -29,6 +29,7 @@ import { useSelector } from "react-redux";
 import { Badge } from "@/components/ui/badge";
 import ActivityList from "@/components/activities/ActivityList";
 import FileList from "@/components/files/FileList";
+import { PersonaBuilder, ObjectionHandler } from "@/components/ai";
 
 const ContactDetail = () => {
   const { id } = useParams();
@@ -174,7 +175,7 @@ const ContactDetail = () => {
               <div>
                 <p className="text-sm font-medium">Owner</p>
                 <p className="text-sm">
-                  {contact.owner?.name || "Not assigned"}
+                  {contact.owner_id?.name || "Not assigned"}
                 </p>
               </div>
             </div>
@@ -281,21 +282,13 @@ const ContactDetail = () => {
         </TabsContent>
 
         <TabsContent value="ai-insights" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>AI Insights</CardTitle>
-              <CardDescription>
-                Persona insights and recommendations based on contact history
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-4">
-                <p className="text-muted-foreground">
-                  AI Insights will be implemented in Phase 5.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="space-y-6">
+            {/* Persona Builder */}
+            <PersonaBuilder contactId={id} />
+
+            {/* Objection Handler */}
+            <ObjectionHandler />
+          </div>
         </TabsContent>
       </Tabs>
 

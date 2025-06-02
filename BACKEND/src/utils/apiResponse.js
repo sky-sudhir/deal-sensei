@@ -34,6 +34,13 @@ class Response {
     });
   }
 
+  forbidden(message = "Forbidden") {
+    return this.res.status(403).json({
+      success: false,
+      message,
+    });
+  }
+
   notFound(message = "Not Found") {
     return this.res.status(404).json({
       success: false,

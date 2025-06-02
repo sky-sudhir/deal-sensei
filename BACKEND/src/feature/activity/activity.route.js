@@ -2,6 +2,7 @@ import express from 'express';
 import ActivityController from './activity.controller.js';
 import { validateCreateActivity, validateUpdateActivity, validateActivityId, validateQueryParams } from './activity.validator.js';
 import { authenticate } from '../../middleware/auth.middleware.js';
+import { generateActivityEmbedding } from '../../middleware/embedding.middleware.js';
 
 const router = express.Router();
 const activityController = new ActivityController();
@@ -12,7 +13,7 @@ router.use(authenticate);
 // Create a new activity
 router.post('/', validateCreateActivity, (req, res, next) => 
   activityController.createActivity(req, res, next)
-);
+, generateActivityEmbedding);
 
 // Get all activities with pagination and filters
 router.get('/', validateQueryParams, (req, res, next) => 
@@ -37,7 +38,7 @@ router.get('/:id', validateActivityId, (req, res, next) =>
 // Update an activity
 router.put('/:id', validateActivityId, validateUpdateActivity, (req, res, next) => 
   activityController.updateActivity(req, res, next)
-);
+, generateActivityEmbedding);
 
 // Delete an activity
 router.delete('/:id', validateActivityId, (req, res, next) => 

@@ -17,6 +17,7 @@ import {
   ChevronLeft,
   X,
   UserCog,
+  Brain,
 } from "lucide-react";
 import { Button } from "../ui/button";
 
@@ -95,6 +96,16 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           name: "Messages",
           path: "/messages",
           icon: MessageSquare,
+        },
+      ],
+    },
+    {
+      title: "AI Tools",
+      items: [
+        {
+          name: "AI Tools",
+          path: "/ai-tools",
+          icon: Brain,
         },
       ],
     },
