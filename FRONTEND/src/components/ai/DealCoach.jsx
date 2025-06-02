@@ -16,20 +16,18 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const DealCoach = ({ dealId }) => {
-  const [refreshKey, setRefreshKey] = useState(0);
-
   const {
     data: d,
     loading,
     error,
+    refetch,
   } = useQuery(`${API_DEAL_COACH}${dealId}`, {
     skip: !dealId,
-    key: refreshKey,
   });
   const data = d?.data?.data;
 
   const handleRefresh = () => {
-    setRefreshKey((prev) => prev + 1);
+    refetch();
   };
 
   // Handle cold start (not enough data)
@@ -111,7 +109,12 @@ const DealCoach = ({ dealId }) => {
       <CardHeader>
         <div className="flex justify-between items-center">
           <CardTitle className="text-xl">Deal Coach</CardTitle>
-          <Button onClick={handleRefresh} variant="outline" size="sm">
+          <Button
+            onClick={handleRefresh}
+            variant="outline"
+            size="sm"
+            className="hover:text-foreground"
+          >
             <RefreshCw className="mr-2 h-4 w-4" /> Refresh
           </Button>
         </div>
@@ -181,21 +184,27 @@ const DealCoach = ({ dealId }) => {
                       </div>
                     )}
                   </div>
-                  
+
                   {/* Next Steps */}
-                  {stage_analysis.next_steps && stage_analysis.next_steps.length > 0 && (
-                    <div className="mt-4">
-                      <p className="text-muted-foreground mb-2">Recommended Next Steps</p>
-                      <ul className="space-y-2">
-                        {stage_analysis.next_steps.map((step, index) => (
-                          <li key={index} className="flex items-start gap-2 text-sm">
-                            <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                            <span>{step}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                  {stage_analysis.next_steps &&
+                    stage_analysis.next_steps.length > 0 && (
+                      <div className="mt-4">
+                        <p className="text-muted-foreground mb-2">
+                          Recommended Next Steps
+                        </p>
+                        <ul className="space-y-2">
+                          {stage_analysis.next_steps.map((step, index) => (
+                            <li
+                              key={index}
+                              className="flex items-start gap-2 text-sm"
+                            >
+                              <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                              <span>{step}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                 </div>
               )}
 
@@ -211,14 +220,17 @@ const DealCoach = ({ dealId }) => {
                       </p>
                     </div>
                     <div>
-                      <p className="text-muted-foreground">Engagement Quality</p>
+                      <p className="text-muted-foreground">
+                        Engagement Quality
+                      </p>
                       <p className="font-medium flex items-center">
                         {activity_analysis.engagement_quality === "Low" ? (
                           <>
                             <AlertCircle className="h-4 w-4 text-amber-500 mr-1" />
                             Low
                           </>
-                        ) : activity_analysis.engagement_quality === "Medium" ? (
+                        ) : activity_analysis.engagement_quality ===
+                          "Medium" ? (
                           <>
                             <CheckCircle2 className="h-4 w-4 text-amber-500 mr-1" />
                             Medium
@@ -232,21 +244,29 @@ const DealCoach = ({ dealId }) => {
                       </p>
                     </div>
                   </div>
-                  
+
                   {/* Suggested Activities */}
-                  {activity_analysis.suggested_activities && activity_analysis.suggested_activities.length > 0 && (
-                    <div className="mt-4">
-                      <p className="text-muted-foreground mb-2">Suggested Activities</p>
-                      <ul className="space-y-2">
-                        {activity_analysis.suggested_activities.map((activity, index) => (
-                          <li key={index} className="flex items-start gap-2 text-sm">
-                            <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                            <span>{activity}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                  {activity_analysis.suggested_activities &&
+                    activity_analysis.suggested_activities.length > 0 && (
+                      <div className="mt-4">
+                        <p className="text-muted-foreground mb-2">
+                          Suggested Activities
+                        </p>
+                        <ul className="space-y-2">
+                          {activity_analysis.suggested_activities.map(
+                            (activity, index) => (
+                              <li
+                                key={index}
+                                className="flex items-start gap-2 text-sm"
+                              >
+                                <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                                <span>{activity}</span>
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
                 </div>
               )}
             </div>

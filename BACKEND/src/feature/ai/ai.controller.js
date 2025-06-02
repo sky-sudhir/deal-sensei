@@ -72,7 +72,9 @@ class AiController {
       }
 
       // Handle both populated and unpopulated company_id fields
-      const dealCompanyId = deal.company_id._id ? deal.company_id._id.toString() : deal.company_id.toString();
+      const dealCompanyId = deal.company_id._id
+        ? deal.company_id._id.toString()
+        : deal.company_id.toString();
       if (dealCompanyId !== company_id.toString()) {
         throw new CustomError("You don't have access to this deal", 403);
       }
@@ -105,11 +107,11 @@ class AiController {
       }
 
       // Get relevant context using vector similarity search
-      const relevantContext = await this.aiRepository.getRelevantContextForDeal(
-        deal,
-        company_id
-      );
-      dealData.relevantContext = relevantContext;
+      // const relevantContext = await this.aiRepository.getRelevantContextForDeal(
+      //   deal,
+      //   company_id
+      // );
+      dealData.relevantContext = deal.ai_embedding;
 
       // Generate AI analysis
       let dealCoachAnalysis;
@@ -153,7 +155,9 @@ class AiController {
       }
 
       // Handle both populated and unpopulated company_id fields
-      const contactCompanyId = contact.company_id._id ? contact.company_id._id.toString() : contact.company_id.toString();
+      const contactCompanyId = contact.company_id._id
+        ? contact.company_id._id.toString()
+        : contact.company_id.toString();
       if (contactCompanyId !== company_id.toString()) {
         throw new CustomError("You don't have access to this contact", 403);
       }
@@ -253,7 +257,9 @@ class AiController {
         }
 
         // Handle both populated and unpopulated company_id fields
-        const dealCompanyId = deal.company_id._id ? deal.company_id._id.toString() : deal.company_id.toString();
+        const dealCompanyId = deal.company_id._id
+          ? deal.company_id._id.toString()
+          : deal.company_id.toString();
         if (dealCompanyId !== company_id.toString()) {
           throw new CustomError("You don't have access to this deal", 403);
         }
@@ -324,9 +330,10 @@ class AiController {
       // Handle both populated and unpopulated company_id fields safely
       let dealCompanyId;
       try {
-        dealCompanyId = deal.company_id && deal.company_id._id 
-          ? deal.company_id._id.toString() 
-          : deal.company_id.toString();
+        dealCompanyId =
+          deal.company_id && deal.company_id._id
+            ? deal.company_id._id.toString()
+            : deal.company_id.toString();
       } catch (error) {
         console.error("Error extracting company ID from deal:", error);
         throw new CustomError("Invalid deal data structure", 500);
@@ -363,7 +370,7 @@ class AiController {
           deal_id,
           company_id
         );
-        
+
         if (!dealData) {
           throw new Error("Failed to retrieve deal data for analysis");
         }
@@ -374,10 +381,8 @@ class AiController {
 
       // Get relevant context using vector similarity search
       try {
-        const relevantContext = await this.aiRepository.getRelevantContextForDeal(
-          deal,
-          company_id
-        );
+        const relevantContext =
+          await this.aiRepository.getRelevantContextForDeal(deal, company_id);
         dealData.relevantContext = relevantContext || [];
       } catch (contextError) {
         console.error("Error retrieving context for deal:", contextError);
@@ -414,7 +419,7 @@ class AiController {
       );
     } catch (error) {
       console.error("Error in getWinLossExplainer:", error);
-      
+
       // Handle specific error types with appropriate status codes
       if (error instanceof CustomError) {
         return next(error);
@@ -423,7 +428,7 @@ class AiController {
       } else if (error.name === "ValidationError") {
         return next(new CustomError("Validation error: " + error.message, 400));
       }
-      
+
       next(new CustomError("Failed to generate win-loss analysis", 500));
     }
   }

@@ -22,18 +22,15 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
 const WinLossExplainer = ({ dealId }) => {
-  const [refreshKey, setRefreshKey] = useState(0);
-
-  const { data, loading, error } = useQuery(
+  const { data, loading, error, refetch } = useQuery(
     `${API_WIN_LOSS_EXPLAINER}${dealId}`,
     {
       skip: !dealId,
-      key: refreshKey,
     }
   );
 
   const handleRefresh = () => {
-    setRefreshKey((prev) => prev + 1);
+    refetch();
   };
 
   if (loading) {
@@ -74,7 +71,8 @@ const WinLossExplainer = ({ dealId }) => {
     );
   }
 
-  const { outcome, key_factors, recommendations, detailed_analysis } = data;
+  const { outcome, key_factors, recommendations, detailed_analysis } =
+    data?.data?.data;
   const isWon = outcome === "won";
 
   return (
@@ -94,7 +92,12 @@ const WinLossExplainer = ({ dealId }) => {
               </>
             )}
           </CardTitle>
-          <Button onClick={handleRefresh} variant="outline" size="sm">
+          <Button
+            onClick={handleRefresh}
+            variant="outline"
+            size="sm"
+            className="hover:text-foreground"
+          >
             <RefreshCw className="mr-2 h-4 w-4" /> Refresh
           </Button>
         </div>
