@@ -206,7 +206,7 @@ const Signup = () => {
             </div>
 
             {/* Terms and Conditions */}
-            <div className="flex items-start space-x-2">
+            <div className="flex items-start space-x-2 pb-6">
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="termsAccepted"
