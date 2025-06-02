@@ -13,7 +13,13 @@ import {
 } from "../ui/dialog";
 import { API_FILES_UPLOAD } from "../../imports/api";
 import axios from "axios";
-import { UploadCloud, X, FileIcon, AlertCircle, CheckCircle2 } from "lucide-react";
+import {
+  UploadCloud,
+  X,
+  FileIcon,
+  AlertCircle,
+  CheckCircle2,
+} from "lucide-react";
 import { showToast } from "@/utils/toast";
 import { getToken } from "@/imports/localStorage";
 import { cn } from "@/lib/utils";
@@ -115,13 +121,14 @@ const FileUpload = ({ isOpen, onClose, onSuccess, entityType, entityId }) => {
             Upload File
           </DialogTitle>
           <DialogDescription>
-            Upload a file to attach to this {entityType?.toLowerCase() || "item"}.
+            Upload a file to attach to this{" "}
+            {entityType?.toLowerCase() || "item"}.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
           {!file ? (
-            <div 
+            <div
               className={cn(
                 "border-2 border-dashed rounded-lg p-8 transition-colors",
                 "hover:border-primary/50 hover:bg-muted/30 cursor-pointer",
@@ -131,7 +138,9 @@ const FileUpload = ({ isOpen, onClose, onSuccess, entityType, entityId }) => {
             >
               <UploadCloud className="h-10 w-10 text-muted-foreground mb-4" />
               <div className="space-y-1">
-                <p className="text-sm font-medium">Drag & drop or click to upload</p>
+                <p className="text-sm font-medium">
+                  Drag & drop or click to upload
+                </p>
                 <p className="text-xs text-muted-foreground">
                   Supports documents, images, and other file types
                 </p>
@@ -168,7 +177,7 @@ const FileUpload = ({ isOpen, onClose, onSuccess, entityType, entityId }) => {
                   </p>
                 </div>
               </div>
-              
+
               {isUploading && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs">
@@ -181,7 +190,7 @@ const FileUpload = ({ isOpen, onClose, onSuccess, entityType, entityId }) => {
                   <Progress value={uploadProgress} className="h-2" />
                 </div>
               )}
-              
+
               {!isUploading && (
                 <div className="text-xs text-muted-foreground italic">
                   <div className="flex items-center gap-1.5">

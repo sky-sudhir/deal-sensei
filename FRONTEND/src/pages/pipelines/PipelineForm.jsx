@@ -209,6 +209,7 @@ const PipelineForm = ({ pipeline, onSuccess }) => {
             type="button"
             variant="outline"
             size="sm"
+            className="hover:text-foreground"
             onClick={() => append({ name: "", win_probability: 0 })}
           >
             <Plus className="h-4 w-4 mr-1" />

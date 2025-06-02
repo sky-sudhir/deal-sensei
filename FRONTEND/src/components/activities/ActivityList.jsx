@@ -173,12 +173,14 @@ const ActivityList = ({ deal_id = null, contact_id = null, apiUrl = null }) => {
                       <Button
                         variant="ghost"
                         size="icon"
+                        className="hover:text-foreground"
                         onClick={() => handleEditClick(activity)}
                       >
                         <PencilIcon className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
+                        className="hover:text-foreground"
                         size="icon"
                         onClick={() => handleDeleteClick(activity)}
                       >

@@ -300,6 +300,7 @@ export default function EditActivityPage() {
               <Button
                 type="button"
                 variant="outline"
+                className="hover:text-foreground"
                 onClick={() => navigate(-1)}
               >
                 Cancel
