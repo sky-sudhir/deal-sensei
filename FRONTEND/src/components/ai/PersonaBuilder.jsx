@@ -15,20 +15,18 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
 const PersonaBuilder = ({ contactId }) => {
-  const [refreshKey, setRefreshKey] = useState(0);
-
   const {
     data: d,
     loading,
     error,
+    refetch,
   } = useQuery(`${API_PERSONA_BUILDER}${contactId}`, {
     skip: !contactId,
-    key: refreshKey,
   });
   const data = d?.data?.data;
 
   const handleRefresh = () => {
-    setRefreshKey((prev) => prev + 1);
+    refetch();
   };
 
   // Handle cold start (not enough data)
@@ -104,7 +102,12 @@ const PersonaBuilder = ({ contactId }) => {
       <CardHeader>
         <div className="flex justify-between items-center">
           <CardTitle className="text-xl">Contact Persona</CardTitle>
-          <Button onClick={handleRefresh} variant="outline" size="sm">
+          <Button
+            onClick={handleRefresh}
+            variant="outline"
+            size="sm"
+            className="hover:text-foreground"
+          >
             <RefreshCw className="mr-2 h-4 w-4" /> Refresh
           </Button>
         </div>

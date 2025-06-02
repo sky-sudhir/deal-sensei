@@ -511,7 +511,10 @@ const Dashboard = () => {
                     Completed
                   </Badge>
                 ) : (
-                  <Button size="sm" onClick={() => navigate("/pipelines/new")}>
+                  <Button
+                    size="sm"
+                    onClick={() => navigate("/pipelines/create")}
+                  >
                     Set Up
                   </Button>
                 )}
@@ -541,7 +544,7 @@ const Dashboard = () => {
                     Completed
                   </Badge>
                 ) : (
-                  <Button size="sm" onClick={() => navigate("/contacts/new")}>
+                  <Button size="sm" onClick={() => navigate("/contacts")}>
                     Add Contact
                   </Button>
                 )}

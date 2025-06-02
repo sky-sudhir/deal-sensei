@@ -15,7 +15,7 @@ const userCreateSchema = Joi.object({
     "any.required": "Name is required",
   }),
   role: Joi.string().valid("admin", "sales_rep").default("sales_rep"),
-  company_id: Joi.string().required().messages({
+  company_id: Joi.string().messages({
     "any.required": "Company ID is required",
   }),
 });
@@ -51,7 +51,7 @@ const loginSchema = Joi.object({
 });
 
 // Export validators using the validator middleware
-export const userCreateValidator = validator(userCreateSchema, 'body');
-export const userUpdateValidator = validator(userUpdateSchema, 'body');
-export const userIdValidator = validator(userIdSchema, 'params');
-export const loginValidator = validator(loginSchema, 'body');
+export const userCreateValidator = validator(userCreateSchema, "body");
+export const userUpdateValidator = validator(userUpdateSchema, "body");
+export const userIdValidator = validator(userIdSchema, "params");
+export const loginValidator = validator(loginSchema, "body");

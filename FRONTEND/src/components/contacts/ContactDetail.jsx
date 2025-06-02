@@ -225,7 +225,12 @@ const ContactDetail = () => {
             <CardHeader>
               <div className="flex justify-between items-center">
                 <CardTitle>Associated Deals</CardTitle>
-                <Button variant="outline" size="sm" onClick={handleCreateDeal}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCreateDeal}
+                  className="hover:text-foreground"
+                >
                   <Briefcase className="mr-2 h-4 w-4" /> New Deal
                 </Button>
               </div>

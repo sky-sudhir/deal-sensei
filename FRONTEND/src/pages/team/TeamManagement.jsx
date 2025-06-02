@@ -132,7 +132,10 @@ const TeamManagement = () => {
                   Invite Team Member
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[500px]">
+              <DialogContent
+                className="sm:max-w-[500px]"
+                onClose={() => setIsInviteDialogOpen(false)}
+              >
                 <DialogHeader>
                   <DialogTitle>Invite Team Member</DialogTitle>
                 </DialogHeader>
@@ -193,6 +196,7 @@ const TeamManagement = () => {
                   <Button
                     variant="outline"
                     size="sm"
+                    className=" hover:text-foreground"
                     onClick={() => handleEdit(user)}
                   >
                     <Pencil className="h-4 w-4 mr-1" />
@@ -201,7 +205,11 @@ const TeamManagement = () => {
                   {user.is_active && (
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="outline" size="sm">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className=" hover:text-foreground"
+                        >
                           <X className="h-4 w-4 mr-1" />
                           Deactivate
                         </Button>

@@ -18,7 +18,9 @@ class AiRepository {
     entityId,
     companyId,
     embeddingVector,
-    contentSummary
+    contentSummary,
+    dealId = null,
+    contactId = null
   ) {
     try {
       // Check if embedding already exists
@@ -32,6 +34,11 @@ class AiRepository {
         existingEmbedding.embedding_vector = embeddingVector;
         existingEmbedding.content_summary = contentSummary;
         existingEmbedding.last_updated = new Date();
+        
+        // Update deal_id and contact_id if provided
+        if (dealId) existingEmbedding.deal_id = dealId;
+        if (contactId) existingEmbedding.contact_id = contactId;
+        
         return await existingEmbedding.save();
       } else {
         // Create new embedding
@@ -41,6 +48,8 @@ class AiRepository {
           company_id: companyId,
           embedding_vector: embeddingVector,
           content_summary: contentSummary,
+          deal_id: dealId,
+          contact_id: contactId
         });
         return await newEmbedding.save();
       }
@@ -103,31 +112,76 @@ class AiRepository {
   }
 
   // Find similar entities across multiple entity types
-  async findSimilarEntitiesAcrossTypes(embeddingVector, companyId, limit = 10) {
+  async findSimilarEntitiesAcrossTypes(embeddingVector, companyId, limit = 10, dealId = null, contactId = null) {
     try {
-      // Use $vectorSearch operator with correct filter syntax
-      return await AiEmbedding.aggregate([
+      // Build filter conditions
+      let filterConditions = [
+        { equals: { path: "company_id", value: companyId } }
+      ];
+
+      // Add deal_id filter if provided
+      if (dealId) {
+        filterConditions.push({ equals: { path: "deal_id", value: dealId } });
+      }
+
+      // Add contact_id filter if provided
+      if (contactId) {
+        filterConditions.push({ equals: { path: "contact_id", value: contactId } });
+      }
+
+      // Use $vectorSearch operator with enhanced filter syntax
+      const aggregation = [
         {
           $search: {
             vectorSearch: {
               queryVector: embeddingVector,
               path: "embedding_vector",
               numCandidates: limit * 3,
-              limit: limit
+              limit: limit * 2 // Get more candidates to allow for scoring
             },
-            filter: {
-              equals: { path: "company_id", value: companyId }
+            filter: filterConditions.length > 1 ? 
+              { compound: { should: filterConditions } } : 
+              { equals: { path: "company_id", value: companyId } }
+          }
+        }
+      ];
+
+      // Add scoring based on deal_id and contact_id matches
+      if (dealId || contactId) {
+        aggregation.push({
+          $addFields: {
+            relevanceScore: {
+              $add: [
+                { $multiply: [{ $meta: "searchScore" }, 10] }, // Base vector similarity score
+                { $cond: [{ $eq: ["$deal_id", dealId] }, 50, 0] }, // Bonus for matching deal
+                { $cond: [{ $eq: ["$contact_id", contactId] }, 50, 0] } // Bonus for matching contact
+              ]
             }
           }
-        },
-        { $limit: limit }
-      ]);
+        });
+        aggregation.push({ $sort: { relevanceScore: -1 } });
+      }
+
+      // Limit results
+      aggregation.push({ $limit: limit });
+
+      return await AiEmbedding.aggregate(aggregation);
     } catch (error) {
       console.error("Vector search error:", error);
       // Fallback to regular find if vector search fails
-      return await AiEmbedding.find({
-        company_id: companyId
-      }).limit(limit);
+      const query = { company_id: companyId };
+      
+      // Add deal_id and contact_id to query if provided
+      if (dealId) query.$or = [{ deal_id: dealId }, { deal_id: null }];
+      if (contactId) {
+        if (query.$or) {
+          query.$or.push({ contact_id: contactId }, { contact_id: null });
+        } else {
+          query.$or = [{ contact_id: contactId }, { contact_id: null }];
+        }
+      }
+      
+      return await AiEmbedding.find(query).limit(limit);
     }
   }
 
@@ -197,13 +251,25 @@ class AiRepository {
         });
       }
       
-      // Store in AI embeddings collection
+      // Store in AI embeddings collection with deal_id or contact_id if applicable
+      let dealId = null;
+      let contactId = null;
+      
+      // Set the appropriate ID based on entity type
+      if (entityType === "deal") {
+        dealId = entity._id;
+      } else if (entityType === "contact") {
+        contactId = entity._id;
+      }
+      
       await this.storeEmbedding(
         entityType,
         entity._id,
         entity.company_id,
         embeddingData.embedding_vector,
-        embeddingData.content_summary
+        embeddingData.content_summary,
+        dealId,
+        contactId
       );
       
       return embeddingData.embedding_vector;
@@ -347,11 +413,13 @@ class AiRepository {
         await this.generateAndStoreEmbeddingForDeal(deal);
       }
 
-      // Find similar entities across multiple types
+      // Find similar entities across multiple types, passing the deal_id
       const similarEntities = await this.findSimilarEntitiesAcrossTypes(
         deal.ai_embedding,
         companyId,
-        limit
+        limit,
+        deal._id, // Pass the deal_id
+        null      // No contact_id for deal context
       );
 
       return similarEntities;
@@ -368,11 +436,13 @@ class AiRepository {
         await this.generateAndStoreEmbeddingForContact(contact);
       }
 
-      // Find similar entities across multiple types
+      // Find similar entities across multiple types, passing the contact_id
       const similarEntities = await this.findSimilarEntitiesAcrossTypes(
         contact.ai_embedding,
         companyId,
-        limit
+        limit,
+        null,       // No deal_id for contact context
+        contact._id // Pass the contact_id
       );
 
       return similarEntities;

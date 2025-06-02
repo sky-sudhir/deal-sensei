@@ -17,6 +17,16 @@ const aiEmbeddingSchema = new mongoose.Schema(
       required: true,
       ref: "Company",
     },
+    deal_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Deal",
+      default: null,
+    },
+    contact_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Contact",
+      default: null,
+    },
     embedding_vector: {
       type: [Number],
       required: true,

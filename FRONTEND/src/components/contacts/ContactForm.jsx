@@ -94,7 +94,7 @@ const ContactForm = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[525px]">
+      <DialogContent className="sm:max-w-[525px]" onClose={handleOpenChange}>
         <DialogHeader>
           <DialogTitle>
             {isEdit ? "Edit Contact" : "Add New Contact"}
