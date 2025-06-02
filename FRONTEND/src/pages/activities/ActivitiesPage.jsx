@@ -178,7 +178,7 @@ const ActivitiesPage = () => {
               </Select>
             </div>
 
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label htmlFor="date-filter">Date</Label>
               <Popover>
                 <PopoverTrigger asChild>
@@ -203,7 +203,7 @@ const ActivitiesPage = () => {
                   />
                 </PopoverContent>
               </Popover>
-            </div>
+            </div> */}
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 items-end mb-4">
