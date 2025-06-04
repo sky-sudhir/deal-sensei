@@ -23,7 +23,7 @@ const PersonaBuilder = ({ contactId }) => {
   } = useQuery(`${API_PERSONA_BUILDER}${contactId}`, {
     skip: !contactId,
   });
-  const data = d?.data?.data;
+  const data = d?.data?.data?.data;
 
   const handleRefresh = () => {
     refetch();

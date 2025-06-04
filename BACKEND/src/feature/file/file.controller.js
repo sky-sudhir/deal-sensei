@@ -43,8 +43,6 @@ class FileController {
         company_id: user.company_id,
       };
 
-      console.log({ fileData, user: req.user }, "qqqqqqqqqqqqqq");
-
       // Only add attached_to_type and attached_to_id if they are provided
       if (attached_to_type !== "general") {
         fileData.attached_to_type = attached_to_type;
@@ -79,7 +77,8 @@ class FileController {
     const response = new Response(res);
     try {
       const { user } = req;
-      const { attached_to_type, attached_to_id, page, limit, sort, search } = req.query;
+      const { attached_to_type, attached_to_id, page, limit, sort, search } =
+        req.query;
 
       const filters = { company_id: user.company_id };
 

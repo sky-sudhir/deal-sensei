@@ -58,7 +58,7 @@ class ActivityController {
 
       // For sales_rep role, only show their own activities unless they're explicitly querying for another user
       if (user.role === "sales_rep" && !user_id) {
-        filters.user_id = user._id;
+        filters.user_id = user.userId;
       } else if (user_id && user_id !== "all") {
         filters.user_id = user_id;
       }
@@ -67,7 +67,7 @@ class ActivityController {
         page: parseInt(page, 10) || 1,
         limit: parseInt(limit, 10) || 10,
         sort: sort || "-created_at",
-        search
+        search,
       };
 
       const result = await this.repository.getActivities(filters, options);
@@ -95,17 +95,6 @@ class ActivityController {
         user.company_id
       );
 
-      // Check if the user has permission to view this activity
-      if (
-        user.role === "sales_rep" &&
-        activity.user_id.toString() !== user._id.toString()
-      ) {
-        throw new CustomError(
-          "You don't have permission to view this activity",
-          403
-        );
-      }
-
       return response.success(activity, "Activity retrieved successfully", 200);
     } catch (error) {
       next(error);
@@ -125,24 +114,6 @@ class ActivityController {
       const { user } = req;
       const updateData = req.body;
 
-      // First, get the activity to check permissions
-      const existingActivity = await this.repository.getActivityById(
-        id,
-        user.company_id
-      );
-
-      // Check if the user has permission to update this activity
-      if (
-        user.role === "sales_rep" &&
-        existingActivity.user_id.toString() !== user._id.toString()
-      ) {
-        throw new CustomError(
-          "You don't have permission to update this activity",
-          403
-        );
-      }
-
-      // Don't allow changing the company_id or user_id
       delete updateData.company_id;
       delete updateData.user_id;
 
@@ -169,23 +140,6 @@ class ActivityController {
     try {
       const { id } = req.params;
       const { user } = req;
-
-      // First, get the activity to check permissions
-      const existingActivity = await this.repository.getActivityById(
-        id,
-        user.company_id
-      );
-
-      // Check if the user has permission to delete this activity
-      if (
-        user.role === "sales_rep" &&
-        existingActivity.user_id.toString() !== user._id.toString()
-      ) {
-        throw new CustomError(
-          "You don't have permission to delete this activity",
-          403
-        );
-      }
 
       await this.repository.deleteActivity(id, user.company_id);
 

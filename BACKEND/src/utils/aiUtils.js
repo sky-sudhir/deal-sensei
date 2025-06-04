@@ -1,9 +1,10 @@
 // This file contains utility functions for AI operations
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import "dotenv/config";
+import CustomError from "./CustomError.js";
 
 // Initialize the Google Generative AI client
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "dummy-key");
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 /**
  * Generate an embedding vector for the given text
@@ -13,7 +14,9 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "dummy-key");
 export async function generateEmbedding(text) {
   try {
     // Use the embedding model
-    const embeddingModel = genAI.getGenerativeModel({ model: "embedding-001" });
+    const embeddingModel = genAI.getGenerativeModel({
+      model: process.env.GEMINI_EMBEDDING_MODEL,
+    });
 
     // Generate embedding
     const result = await embeddingModel.embedContent(text);
@@ -21,9 +24,7 @@ export async function generateEmbedding(text) {
 
     return embedding;
   } catch (error) {
-    console.error("Error generating embedding:", error);
-    // Return a default embedding vector with zeros in case of error
-    return new Array(512).fill(0);
+    throw new CustomError(error);
   }
 }
 
@@ -32,16 +33,15 @@ export async function generateEmbedding(text) {
  * @param {string} text - The text to summarize
  * @returns {Promise<string>} - A promise that resolves to a summary
  */
-export async function generateContentSummary(text) {
+export async function generateContentSummary(prompt) {
   try {
     // Use the generative model
     const generativeModel = genAI.getGenerativeModel({
       model: "gemini-1.5-flash",
-      generationConfig: { temperature: 0.2 },
+      generationConfig: { temperature: 0.3 },
     });
 
     // Generate summary
-    const prompt = `Summarize the following text in 2-3 sentences:\n\n${text}`;
     const result = await generativeModel.generateContent(prompt);
     const summary = result.response.text();
 
@@ -82,28 +82,71 @@ export function processTextForEmbedding(text) {
  * @returns {Promise<Object>} - A promise that resolves to embedding data
  */
 export async function createEntityEmbedding(entity, entityType) {
+  // console.log(JSON.stringify(entity), entityType, "qqqqqqqqqqqqqqqqqq");
   try {
     let textToEmbed = "";
     let contentSummary = "";
 
     // Format text based on entity type
     switch (entityType) {
+      case "message":
+        textToEmbed = `Context: ${entity.message_user}. Updated At: ${entity.updated_at}`;
+
+        break;
       case "deal":
-        textToEmbed = `Deal: ${entity.title}. Value: ${entity.value}. Stage: ${entity.stage}. Status: ${entity.status || "open"}. Notes: ${entity.notes || ""}`;
+        textToEmbed = `Deal Title: ${entity.title}. Value: ${
+          entity.value
+        }.Deal Amount: ${entity.value} Stage: ${entity.stage}. Status: ${
+          entity.status || "open"
+        }. Win Probability: ${
+          entity.pipeline_id.stages.find((stage) => stage.name === entity.stage)
+            ?.win_probability || ""
+        }. Close Date: ${entity.close_date || ""}. Notes: ${
+          entity.notes || ""
+        }. Pipeline Name: ${entity.pipeline_id.name}. ${entity.contact_ids
+          .map(
+            (v) =>
+              `Contact Name: ${v.name}. Email: ${v.email || ""}. Phone: ${
+                v.phone || ""
+              }.`
+          )
+          .join(" ")}. Owner Name: ${entity.owner_id.name}. Owner Email: ${
+          entity.owner_id.email
+        }. Updated At: ${entity.updated_at}`;
         contentSummary = `Deal: ${entity.title} - ${entity.value}`;
         break;
       case "contact":
-        textToEmbed = `Contact: ${entity.name}. Email: ${entity.email || ""}. Phone: ${entity.phone || ""}. Notes: ${entity.notes || ""}`;
+        textToEmbed = `Contact Name: ${entity.name}. Email: ${
+          entity.email || ""
+        }. Phone: ${entity.phone || ""}. Notes: ${
+          entity.notes || ""
+        }. Updated At: ${entity.updated_at}`;
         contentSummary = `Contact: ${entity.name}`;
         break;
       case "activity":
-        textToEmbed = `Activity: ${entity.type}. Subject: ${entity.subject}. Content: ${entity.content}. Next steps: ${entity.next_steps || ""}`;
+        textToEmbed = `Activity Type: ${entity.type}. Subject: ${
+          entity.subject
+        }. Content: ${entity.content}. Next steps: ${
+          entity.next_steps || ""
+        }. Duration Minutes: ${
+          entity.duration_minutes || ""
+        }. Sentiment Score: ${
+          entity.sentiment_score || ""
+        } Objections Mentioned: ${entity.objections_mentioned.join(
+          ", "
+        )}. Next Steps: ${entity.next_steps || ""}. Contact Name: ${
+          entity?.contact_id?.name
+        }. Contact Email: ${entity?.contact_id?.email}. Deal Title: ${
+          entity?.deal_id?.title
+        }. Deal Value: ${entity?.deal_id?.value}. Updated At: ${
+          entity.updated_at
+        }. `;
         contentSummary = `Activity: ${entity.subject}`;
         break;
-      case "email_template":
-        textToEmbed = `Template: ${entity.name}. Subject: ${entity.subject}. Body: ${entity.body}`;
-        contentSummary = `Template: ${entity.name}`;
-        break;
+      // case "email_template":
+      //   textToEmbed = `Id: ${entity._id}. Template: ${entity.name}. Subject: ${entity.subject}. Body: ${entity.body} Updated At: ${entity.updated_at}`;
+      //   contentSummary = `Template: ${entity.name}`;
+      //   break;
       default:
         textToEmbed = JSON.stringify(entity);
         contentSummary = `${entityType}: ${entity._id}`;
@@ -118,7 +161,7 @@ export async function createEntityEmbedding(entity, entityType) {
       entity_id: entity._id,
       company_id: entity.company_id,
       embedding_vector: embeddingVector,
-      content_summary: contentSummary.substring(0, 200), // Limit summary length
+      content_summary: textToEmbed, // Limit summary length
     };
   } catch (error) {
     console.error(`Error creating embedding for ${entityType}:`, error);
@@ -138,23 +181,28 @@ export async function generateAndStoreEmbedding(entity, entityType, model) {
   try {
     // Generate embedding data
     const embeddingData = await createEntityEmbedding(entity, entityType);
-    
+
     if (!embeddingData) {
-      console.error(`Failed to create embedding for ${entityType} ${entity._id}`);
+      console.error(
+        `Failed to create embedding for ${entityType} ${entity._id}`
+      );
       return null;
     }
-    
+
     // Update the entity with the embedding vector
-    await model.findByIdAndUpdate(entity._id, { 
-      ai_embedding: embeddingData.embedding_vector 
+    await model.findByIdAndUpdate(entity._id, {
+      ai_embedding: embeddingData.embedding_vector,
     });
-    
+
     // Store in AI embeddings collection if needed
     // This would require importing and using the AiEmbedding model or repository
-    
+
     return embeddingData.embedding_vector;
   } catch (error) {
-    console.error(`Error generating and storing embedding for ${entityType}:`, error);
+    console.error(
+      `Error generating and storing embedding for ${entityType}:`,
+      error
+    );
     return null;
   }
 }

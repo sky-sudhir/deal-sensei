@@ -16,7 +16,7 @@ class UserRepository {
 
   async findUserByEmail(email) {
     try {
-      const user = await UserModel.findOne({ email });
+      const user = await UserModel.findOne({ email }).populate("company_id");
       return user;
     } catch (error) {
       throw new CustomError(error);
@@ -26,11 +26,11 @@ class UserRepository {
   async findUserById(userId) {
     try {
       const user = await UserModel.findById(userId).select("-password");
-      
+
       if (!user) {
         throw new CustomError("User not found", 404);
       }
-      
+
       return user;
     } catch (error) {
       throw new CustomError(error);
@@ -45,7 +45,7 @@ class UserRepository {
       }
 
       const user = await UserModel.findById(userId);
-      
+
       if (!user) {
         throw new CustomError("User not found", 404);
       }
@@ -56,7 +56,7 @@ class UserRepository {
         updateData,
         { new: true, runValidators: true }
       ).select("-password");
-      
+
       return updatedUser;
     } catch (error) {
       throw new CustomError(error);
@@ -66,15 +66,15 @@ class UserRepository {
   async getUsersByCompany(companyId, query = {}) {
     try {
       // Combine the company filter with any additional query filters
-      const combinedQuery = { 
+      const combinedQuery = {
         company_id: companyId,
-        ...query
+        ...query,
       };
-      
+
       const users = await UserModel.find(combinedQuery)
         .select("-password")
         .sort({ name: 1 });
-        
+
       return users;
     } catch (error) {
       throw new CustomError(error);
@@ -84,7 +84,7 @@ class UserRepository {
   async deactivateUser(userId) {
     try {
       const user = await UserModel.findById(userId);
-      
+
       if (!user) {
         throw new CustomError("User not found", 404);
       }
@@ -94,7 +94,7 @@ class UserRepository {
         const adminCount = await UserModel.countDocuments({
           company_id: user.company_id,
           role: "admin",
-          is_active: true
+          is_active: true,
         });
 
         if (adminCount <= 1) {
@@ -105,7 +105,7 @@ class UserRepository {
       // Instead of hard deleting, set is_active to false
       user.is_active = false;
       await user.save();
-      
+
       return { message: "User deactivated successfully" };
     } catch (error) {
       throw new CustomError(error);

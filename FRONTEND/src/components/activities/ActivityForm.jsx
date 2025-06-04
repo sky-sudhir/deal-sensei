@@ -59,8 +59,12 @@ const ActivityForm = ({
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activityType, setActivityType] = useState(initialData.type || "note");
-  const [selectedDealId, setSelectedDealId] = useState(dealId || initialData.deal_id || "");
-  const [selectedContactId, setSelectedContactId] = useState(contactId || initialData.contact_id || "");
+  const [selectedDealId, setSelectedDealId] = useState(
+    dealId || initialData.deal_id || ""
+  );
+  const [selectedContactId, setSelectedContactId] = useState(
+    contactId || initialData.contact_id || ""
+  );
 
   const {
     register,
@@ -101,7 +105,7 @@ const ActivityForm = ({
       setActivityType(initialData.type || "note");
       setSelectedDealId(dealId || initialData.deal_id || "");
       setSelectedContactId(contactId || initialData.contact_id || "");
-      
+
       reset({
         type: initialData.type || "note",
         subject: initialData.subject || "",

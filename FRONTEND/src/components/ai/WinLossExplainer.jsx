@@ -72,7 +72,7 @@ const WinLossExplainer = ({ dealId }) => {
   }
 
   const { outcome, key_factors, recommendations, detailed_analysis } =
-    data?.data?.data;
+    data?.data?.data?.data;
   const isWon = outcome === "won";
 
   return (

@@ -105,3 +105,7 @@ export const CASE_STUDY = "case-studies";
 export const CASE_STUDIES_ME = "case-studies";
 export const PUBLIC_PORTFOLIO = "public";
 export const OAUTH_GOOGLE_AUTHORIZE = "oauth2/google/authorize";
+
+export const OBJECTION_HANDLER = "api/v1/ai/chatbot";
+
+export const CHATBOT_MESSAGES = "api/v1/messages";

@@ -58,108 +58,70 @@ const ContactSchema = new mongoose.Schema(
 // Create indexes
 ContactSchema.index({ company_id: 1 });
 ContactSchema.index({ owner_id: 1 });
-ContactSchema.index(
-  { email: 1, company_id: 1 },
-  { unique: true, sparse: true }
-);
-ContactSchema.index({ ai_embedding: "vector" }, { background: true });
 
 // Middleware to generate embeddings on save and update
-ContactSchema.pre("save", async function (next) {
+ContactSchema.post("save", async function (doc) {
   try {
-    // Only generate embedding if document is new or relevant fields have changed
-    if (
-      this.isNew ||
-      this.isModified("name") ||
-      this.isModified("email") ||
-      this.isModified("phone") ||
-      this.isModified("notes")
-    ) {
-      console.log(`Generating embedding for contact ${this._id}`);
-      const embeddingData = await createEntityEmbedding(this, "contact");
-      if (embeddingData && embeddingData.embedding_vector) {
-        this.ai_embedding = embeddingData.embedding_vector;
-        
-        // Also store in the central AI embeddings collection
-        // Only if we have an _id (for new documents)
-        if (this._id) {
-          try {
-            // Import dynamically to avoid circular dependency
-            const AiRepository = (await import("../ai/ai.repository.js")).default;
-            const aiRepo = new AiRepository();
-            
-            await aiRepo.storeEmbedding(
-              "contact",
-              this._id,
-              this.company_id,
-              embeddingData.embedding_vector,
-              embeddingData.content_summary
-            );
-          } catch (storeError) {
-            console.error(`Error storing embedding in central collection: ${storeError.message}`);
-            // Continue even if central storage fails
-          }
-        }
+    const embeddingData = await createEntityEmbedding(doc, "contact");
+    if (embeddingData?.embedding_vector) {
+      try {
+        const AiRepository = (await import("../ai/ai.repository.js")).default;
+        const aiRepo = new AiRepository();
+
+        await aiRepo.storeEmbedding(
+          "contact",
+          doc._id,
+          doc.company_id,
+          embeddingData.embedding_vector,
+          embeddingData.content_summary,
+          null,
+          doc._id
+        );
+      } catch (storeError) {
+        console.error(
+          `Error storing embedding in central collection: ${storeError.message}`
+        );
       }
     }
-    next();
   } catch (error) {
-    console.error(`Error generating embedding for contact ${this._id}:`, error);
-    // Continue saving even if embedding generation fails
-    next();
+    console.error(`Error generating embedding for contact ${doc._id}:`, error);
   }
 });
 
 // Middleware for findOneAndUpdate operations
-ContactSchema.pre("findOneAndUpdate", async function (next) {
+ContactSchema.post("findOneAndUpdate", async function (doc) {
   try {
-    const update = this.getUpdate();
-    const contactId = this.getQuery()._id;
+    if (!doc) return;
 
-    // Check if relevant fields are being updated
-    if (update.name || update.email || update.phone || update.notes) {
-      // Get the updated document
-      const contact = await this.model.findOne(this.getQuery());
-      if (!contact) return next();
+    const contactId = doc._id;
 
-      // Apply updates to the document (for embedding generation)
-      if (update.name) contact.name = update.name;
-      if (update.email) contact.email = update.email;
-      if (update.phone) contact.phone = update.phone;
-      if (update.notes) contact.notes = update.notes;
+    const embeddingData = await createEntityEmbedding(
+      doc.toObject(),
+      "contact"
+    );
 
-      console.log(`Generating embedding for updated contact ${contactId}`);
-      const embeddingData = await createEntityEmbedding(contact, "contact");
-      if (embeddingData && embeddingData.embedding_vector) {
-        // Add the embedding to the update operation
-        this.setUpdate({
-          ...update,
-          ai_embedding: embeddingData.embedding_vector,
-        });
-        
-        // Also store in the central AI embeddings collection
-        try {
-          // Import dynamically to avoid circular dependency
-          const AiRepository = (await import("../ai/ai.repository.js")).default;
-          const aiRepo = new AiRepository();
-          
-          await aiRepo.storeEmbedding(
-            "contact",
-            contactId,
-            contact.company_id,
-            embeddingData.embedding_vector,
-            embeddingData.content_summary
-          );
-        } catch (storeError) {
-          console.error(`Error storing embedding in central collection: ${storeError.message}`);
-          // Continue even if central storage fails
-        }
+    if (embeddingData?.embedding_vector) {
+      try {
+        const AiRepository = (await import("../ai/ai.repository.js")).default;
+        const aiRepo = new AiRepository();
+
+        await aiRepo.storeEmbedding(
+          "contact",
+          contactId,
+          doc.company_id,
+          embeddingData.embedding_vector,
+          embeddingData.content_summary,
+          null,
+          contactId
+        );
+      } catch (storeError) {
+        console.error(
+          `Error storing contact embedding in central collection: ${storeError.message}`
+        );
       }
     }
-    next();
   } catch (error) {
-    console.error("Error in contact findOneAndUpdate middleware:", error);
-    next();
+    console.error("Error in contact findOneAndUpdate post middleware:", error);
   }
 });
 

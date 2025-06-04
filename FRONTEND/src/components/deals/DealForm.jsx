@@ -298,8 +298,8 @@ const DealForm = ({ initialData = null, isEdit = false }) => {
                     </SelectTrigger>
                     <SelectContent>
                       {selectedPipeline?.stages?.map((stage) => (
-                        <SelectItem key={stage.name} value={stage._id}>
-                          {stage.name}
+                        <SelectItem key={stage.name} value={stage?.name || ""}>
+                          {stage?.name || ""}
                         </SelectItem>
                       ))}
                     </SelectContent>

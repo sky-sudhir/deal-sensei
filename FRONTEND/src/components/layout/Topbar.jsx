@@ -32,6 +32,7 @@ const Topbar = ({ toggleSidebar, isSidebarOpen, isMobile }) => {
   const { user } = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
+  console.log(user, "qqqqqqqqqqqqqqqqqqq");
   // Handle theme toggle
   useEffect(() => {
     setMounted(true);
@@ -80,14 +81,11 @@ const Topbar = ({ toggleSidebar, isSidebarOpen, isMobile }) => {
           {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
         </Button>
 
-        {/* <div className="flex relative max-w-md z-10">
-          <Input
-            type="text"
-            placeholder="Search..."
-            className="pl-10 w-[200px] focus:w-[280px] transition-all duration-300 shadow-sm hover:shadow"
-            icon={Search}
-          />
-        </div> */}
+        <div className="flex relative max-w-md z-10">
+          <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
+            {user?.company_id?.name}
+          </h1>
+        </div>
       </div>
 
       {/* Right section with notifications, theme toggle, and profile */}

@@ -77,106 +77,72 @@ const DealSchema = new mongoose.Schema(
 // Create indexes
 DealSchema.index({ company_id: 1 });
 DealSchema.index({ owner_id: 1 });
-DealSchema.index({ pipeline_id: 1 });
-DealSchema.index({ status: 1, company_id: 1 });
-DealSchema.index({ ai_embedding: "vector" }, { background: true });
 
 // Middleware to generate embeddings on save and update
-DealSchema.pre("save", async function (next) {
+DealSchema.post("save", async function (doc) {
   try {
-    // Only generate embedding if document is new or title/notes/value/stage has changed
-    if (
-      this.isNew ||
-      this.isModified("title") ||
-      this.isModified("notes") ||
-      this.isModified("value") ||
-      this.isModified("stage")
-    ) {
-      console.log(`Generating embedding for deal ${this._id}`);
-      const embeddingData = await createEntityEmbedding(this, "deal");
-      if (embeddingData && embeddingData.embedding_vector) {
-        this.ai_embedding = embeddingData.embedding_vector;
-        
-        // Also store in the central AI embeddings collection
-        // Only if we have an _id (for new documents)
-        if (this._id) {
-          try {
-            // Import dynamically to avoid circular dependency
-            const AiRepository = (await import("../ai/ai.repository.js")).default;
-            const aiRepo = new AiRepository();
-            
-            await aiRepo.storeEmbedding(
-              "deal",
-              this._id,
-              this.company_id,
-              embeddingData.embedding_vector,
-              embeddingData.content_summary
-            );
-          } catch (storeError) {
-            console.error(`Error storing embedding in central collection: ${storeError.message}`);
-            // Continue even if central storage fails
-          }
-        }
+    const DealRepository = (await import("./deal.repository.js")).default;
+    const dealRepo = new DealRepository();
+    const currentDeal = await dealRepo.findDealById(doc._id);
+
+    const embeddingData = await createEntityEmbedding(currentDeal, "deal");
+
+    if (embeddingData?.embedding_vector) {
+      try {
+        // Dynamically import to avoid circular dependency
+        const AiRepository = (await import("../ai/ai.repository.js")).default;
+        const aiRepo = new AiRepository();
+
+        await aiRepo.storeEmbedding(
+          "deal",
+          doc._id,
+          doc.company_id,
+          embeddingData.embedding_vector,
+          embeddingData.content_summary,
+          doc._id
+        );
+      } catch (storeError) {
+        console.error(
+          `Error storing embedding in central collection: ${storeError.message}`
+        );
+        // Don't block the flow
       }
     }
-    next();
   } catch (error) {
-    console.error(`Error generating embedding for deal ${this._id}:`, error);
-    // Continue saving even if embedding generation fails
-    next();
+    console.error(`Error generating embedding for deal ${doc._id}:`, error);
+    // Don't throw, avoid blocking save
   }
 });
 
 // Middleware for findOneAndUpdate operations
-DealSchema.pre("findOneAndUpdate", async function (next) {
+DealSchema.post("findOneAndUpdate", async function (doc) {
   try {
-    const update = this.getUpdate();
-    const dealId = this.getQuery()._id;
+    if (!doc) return;
 
-    // Check if relevant fields are being updated
-    if (update.title || update.notes || update.value || update.stage) {
-      // Get the updated document
-      const deal = await this.model.findOne(this.getQuery());
-      if (!deal) return next();
+    const embeddingData = await createEntityEmbedding(doc.toObject(), "deal");
 
-      // Apply updates to the document (for embedding generation)
-      if (update.title) deal.title = update.title;
-      if (update.notes) deal.notes = update.notes;
-      if (update.value) deal.value = update.value;
-      if (update.stage) deal.stage = update.stage;
+    if (embeddingData?.embedding_vector) {
+      try {
+        // Dynamically import to avoid circular dependencies
+        const AiRepository = (await import("../ai/ai.repository.js")).default;
+        const aiRepo = new AiRepository();
 
-      console.log(`Generating embedding for updated deal ${dealId}`);
-      const embeddingData = await createEntityEmbedding(deal, "deal");
-      if (embeddingData && embeddingData.embedding_vector) {
-        // Add the embedding to the update operation
-        this.setUpdate({
-          ...update,
-          ai_embedding: embeddingData.embedding_vector,
-        });
-        
-        // Also store in the central AI embeddings collection
-        try {
-          // Import dynamically to avoid circular dependency
-          const AiRepository = (await import("../ai/ai.repository.js")).default;
-          const aiRepo = new AiRepository();
-          
-          await aiRepo.storeEmbedding(
-            "deal",
-            dealId,
-            deal.company_id,
-            embeddingData.embedding_vector,
-            embeddingData.content_summary
-          );
-        } catch (storeError) {
-          console.error(`Error storing embedding in central collection: ${storeError.message}`);
-          // Continue even if central storage fails
-        }
+        await aiRepo.storeEmbedding(
+          "deal",
+          doc._id,
+          doc.company_id,
+          embeddingData.embedding_vector,
+          embeddingData.content_summary,
+          doc._id
+        );
+      } catch (storeError) {
+        console.error(
+          `Error storing embedding in central collection: ${storeError.message}`
+        );
       }
     }
-    next();
   } catch (error) {
-    console.error("Error in deal findOneAndUpdate middleware:", error);
-    next();
+    console.error("Error in deal findOneAndUpdate post middleware:", error);
   }
 });
 

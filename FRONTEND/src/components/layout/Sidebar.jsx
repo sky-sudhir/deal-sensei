@@ -18,6 +18,7 @@ import {
   X,
   UserCog,
   Brain,
+  IndianRupee,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { motion } from "framer-motion";
@@ -59,7 +60,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         {
           name: "Deals",
           path: "/deals",
-          icon: DollarSign,
+          icon: IndianRupee,
         },
         {
           name: "Pipelines",

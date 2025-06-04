@@ -1,10 +1,10 @@
 import express from "express";
 import AiController from "./ai.controller.js";
-import { 
-  dealIdValidator, 
-  contactIdValidator, 
+import {
+  dealIdValidator,
+  contactIdValidator,
   objectionHandlerValidator,
-  embeddingGenerationValidator
+  embeddingGenerationValidator,
 } from "./ai.validator.js";
 import { authenticate, authorize } from "../../middleware/auth.middleware.js";
 
@@ -13,14 +13,6 @@ const aiController = new AiController();
 
 // All routes require authentication
 router.use(authenticate);
-
-// Generate embeddings for entities (admin only)
-router.post(
-  "/generate-embeddings",
-  authorize(["admin"]),
-  embeddingGenerationValidator,
-  aiController.generateEmbeddings.bind(aiController)
-);
 
 // Deal Coach endpoint
 router.get(
@@ -44,6 +36,12 @@ router.post(
   authorize(["admin", "sales_rep"]),
   objectionHandlerValidator,
   aiController.handleObjection.bind(aiController)
+);
+router.post(
+  "/chatbot",
+  authorize(["admin", "sales_rep"]),
+  objectionHandlerValidator,
+  aiController.handleChatbot.bind(aiController)
 );
 
 // Win-Loss Explainer endpoint

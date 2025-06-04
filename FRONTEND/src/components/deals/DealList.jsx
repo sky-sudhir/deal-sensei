@@ -271,9 +271,7 @@ const DealList = () => {
                     </div>
                     <div className="flex justify-between">
                       <span>Stage:</span>
-                      <span className="font-medium">
-                        {getStageNameById(deal)}
-                      </span>
+                      <span className="font-medium">{deal.stage}</span>
                     </div>
                     {deal.owner_id && (
                       <div className="flex justify-between">
