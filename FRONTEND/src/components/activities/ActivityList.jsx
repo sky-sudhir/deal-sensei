@@ -51,7 +51,6 @@ const ActivityList = ({ deal_id = null, contact_id = null, apiUrl = null }) => {
     ...(deal_id && deal_id !== "all" && { deal_id }),
     ...(contact_id && contact_id !== "all" && { contact_id }),
   };
-
   // Determine the URL to use for fetching activities
   const url = apiUrl || `${API_ACTIVITIES_LIST}?${generateParam(queryParams)}`;
 

@@ -33,12 +33,14 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
+  IndianRupee,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useSelector } from "react-redux";
 import ActivityList from "@/components/activities/ActivityList";
 import FileList from "@/components/files/FileList";
 import { DealCoach, WinLossExplainer, ObjectionHandler } from "@/components/ai";
+import ChatBot from "../ai/ChatBot";
 
 const DealDetail = () => {
   const { id } = useParams();
@@ -176,7 +178,7 @@ const DealDetail = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center">
-              <DollarSign className="mr-3 h-5 w-5 text-muted-foreground" />
+              <IndianRupee className="mr-3 h-5 w-5 text-muted-foreground" />
               <div>
                 <p className="text-sm font-medium">Value</p>
                 <p className="text-lg font-semibold">
@@ -239,7 +241,7 @@ const DealDetail = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="font-medium">Current Stage:</span>
-                <Badge variant="secondary">{getStageNameById(deal)}</Badge>
+                <Badge variant="secondary">{deal.stage}</Badge>
               </div>
 
               <div className="space-y-2">
@@ -254,7 +256,7 @@ const DealDetail = () => {
                   </SelectTrigger>
                   <SelectContent>
                     {deal.pipeline_id?.stages.map((stage) => (
-                      <SelectItem key={stage._id} value={stage._id}>
+                      <SelectItem key={stage._id} value={stage.name}>
                         {stage.name}
                       </SelectItem>
                     ))}
@@ -322,6 +324,7 @@ const DealDetail = () => {
           <TabsTrigger value="activities">Activities</TabsTrigger>
           <TabsTrigger value="files">Files</TabsTrigger>
           <TabsTrigger value="ai-insights">AI Insights</TabsTrigger>
+          <TabsTrigger value="chatbot">Chatbot</TabsTrigger>
         </TabsList>
 
         <TabsContent value="contacts" className="mt-4">
@@ -373,7 +376,7 @@ const DealDetail = () => {
         </TabsContent>
 
         <TabsContent value="activities" className="mt-4">
-          <ActivityList dealId={id} />
+          <ActivityList deal_id={id} />
         </TabsContent>
 
         <TabsContent value="files" className="mt-4">
@@ -384,15 +387,18 @@ const DealDetail = () => {
           <div className="space-y-6">
             {/* Deal Coach */}
             <DealCoach dealId={id} />
-            
+
             {/* Only show Win-Loss Explainer for closed deals */}
             {deal.status === "won" || deal.status === "lost" ? (
               <WinLossExplainer dealId={id} />
             ) : null}
-            
+
             {/* Objection Handler */}
             <ObjectionHandler dealId={id} />
           </div>
+        </TabsContent>
+        <TabsContent value="chatbot" className="mt-4">
+          <ChatBot deal_id={id} />
         </TabsContent>
       </Tabs>
     </div>

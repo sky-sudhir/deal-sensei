@@ -24,7 +24,7 @@ const DealCoach = ({ dealId }) => {
   } = useQuery(`${API_DEAL_COACH}${dealId}`, {
     skip: !dealId,
   });
-  const data = d?.data?.data;
+  const data = d?.data?.data?.data?.deal_coach;
 
   const handleRefresh = () => {
     refetch();

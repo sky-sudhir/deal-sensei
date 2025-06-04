@@ -61,12 +61,6 @@ const fileAttachmentSchema = new mongoose.Schema(
 // Index for company_id and created_at for efficient queries
 fileAttachmentSchema.index({ company_id: 1, created_at: -1 });
 
-// Index for attached_to_id and attached_to_type
-fileAttachmentSchema.index({ attached_to_id: 1, attached_to_type: 1 });
-
-// Index for uploaded_by
-fileAttachmentSchema.index({ uploaded_by: 1 });
-
 // Ensure files can only be viewed by users in the same company
 fileAttachmentSchema.pre("find", function () {
   if (this._conditions.company_id === undefined) {

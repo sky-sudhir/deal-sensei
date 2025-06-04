@@ -45,6 +45,7 @@ import {
   LineChart,
   AlertCircle,
   CalendarClock,
+  IndianRupee,
 } from "lucide-react";
 import { BarChart, LineChart as TremorLineChart } from "@tremor/react";
 import useQuery from "../../hooks/useQuery";
@@ -128,7 +129,6 @@ const Dashboard = () => {
 
     // Get sales reps only
     const salesReps = users;
-    console.log("salesReps", salesReps);
 
     // Calculate performance metrics for each rep
     return salesReps
@@ -136,7 +136,6 @@ const Dashboard = () => {
         const repDeals = deals.filter(
           (deal) => deal.owner_id._id.toString() === rep._id.toString()
         );
-        console.log("repDeals", repDeals);
         const repOpenDeals = repDeals.filter(
           (deal) => deal.status === "open"
         ).length;
@@ -191,7 +190,6 @@ const Dashboard = () => {
 
   // Deal stage data for pipeline chart
   const dealStageData = useMemo(() => {
-    console.log("deals", deals, pipelines);
     if (!deals.length || !pipelines.length) return [];
 
     // Get the default pipeline or first available
@@ -323,7 +321,6 @@ const Dashboard = () => {
     dealCreated: false,
   });
 
-  console.log("teamPerformance", teamPerformance);
   return (
     <>
       <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-card p-4 rounded-lg border shadow-sm">
@@ -402,7 +399,7 @@ const Dashboard = () => {
                 </p>
               </div>
               <div className="p-2 bg-primary/10 rounded-full">
-                <DollarSign className="h-5 w-5 text-primary" />
+                <IndianRupee className="h-5 w-5 text-primary" />
               </div>
             </div>
           </CardContent>
@@ -631,7 +628,6 @@ const Dashboard = () => {
                 {/* Get top stages with deals */}
                 {Object.entries(
                   dealStageData.reduce((acc, stage) => {
-                    console.log(stage, "qqqqqq");
                     if (stage.value > 0) {
                       acc[stage.name] = stage.value;
                     }
@@ -777,22 +773,6 @@ const Dashboard = () => {
               </div>
             ) : deals.length > 0 ? (
               <div className="space-y-4">
-                <div className="p-3 bg-orange-50 border border-orange-100 rounded-lg">
-                  <div className="flex items-start gap-3">
-                    <div className="mt-1">
-                      <AlertCircle size={18} className="text-orange-500" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-orange-700">
-                        Opportunity Alert
-                      </div>
-                      <div className="text-xs text-orange-600 mt-1">
-                        The deal has been in the same stage for 14 days.
-                        Consider following up.
-                      </div>
-                    </div>
-                  </div>
-                </div>
                 <Button
                   variant="link"
                   className="w-full text-primary mt-4 flex items-center justify-center gap-2"

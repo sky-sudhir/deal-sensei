@@ -7,8 +7,8 @@ export default async function apiHandler(query) {
   const token = getToken();
   const { method = "GET", skipToken, contentType, data, params, url } = query;
   // Ensure we don't have double slashes in the URL
-  const formattedUrl = url.startsWith('/') ? url.substring(1) : url;
-  
+  const formattedUrl = url.startsWith("/") ? url.substring(1) : url;
+
   const config = {
     method: method,
     url: `${BACKEND_URL}${encodeURI(formattedUrl)}`,
@@ -19,8 +19,8 @@ export default async function apiHandler(query) {
     data: data,
     params: params,
   };
-  
-  console.log('API Request URL:', config.url);
+
+  console.log("API Request URL:", config.url);
   if (!token || skipToken) {
     config.headers.Authorization = "";
   }
@@ -38,7 +38,10 @@ export default async function apiHandler(query) {
     return result;
   } catch (error) {
     const errorMessage =
-      error.response?.data?.message || error.message || "An error occurred";
+      error.response?.data?.message?.[0]?.message ||
+      error.response?.data?.message ||
+      error.message ||
+      "An error occurred";
     const status = error.response?.status || 500;
 
     // Only show toast for non-403 errors

@@ -27,14 +27,14 @@ class ActivityRepository {
     try {
       const { page = 1, limit = 10, sort = "-created_at", search } = options;
       const skip = (page - 1) * limit;
-      
+
       // Handle search parameter if provided
       if (search) {
         // Create a text search filter
         filters.$or = [
-          { subject: { $regex: search, $options: 'i' } },
-          { content: { $regex: search, $options: 'i' } },
-          { type: { $regex: search, $options: 'i' } }
+          { subject: { $regex: search, $options: "i" } },
+          { content: { $regex: search, $options: "i" } },
+          { type: { $regex: search, $options: "i" } },
         ];
       }
 

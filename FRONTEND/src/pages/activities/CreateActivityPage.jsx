@@ -78,7 +78,7 @@ export default function CreateActivityPage() {
   const contacts = contactsData?.data?.data?.contacts || [];
 
   // Create activity mutation
-  const { mutate, isLoading } = useMutation();
+  const { mutate, loading: isLoading } = useMutation();
 
   // Handle form submission
   const onSubmit = async (data) => {

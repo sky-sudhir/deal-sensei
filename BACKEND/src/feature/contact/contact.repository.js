@@ -16,6 +16,14 @@ class ContactRepository {
       throw new CustomError(error);
     }
   }
+  async getContactsByDeal(dealId) {
+    try {
+      const contacts = await ContactModel.find({ deal_id: dealId });
+      return contacts;
+    } catch (error) {
+      throw new CustomError(error);
+    }
+  }
 
   async findContactById(contactId) {
     try {

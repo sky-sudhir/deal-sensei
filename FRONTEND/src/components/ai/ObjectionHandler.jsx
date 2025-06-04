@@ -22,12 +22,13 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const ObjectionHandler = ({ dealId = null }) => {
+const ObjectionHandler = ({ dealId = null, contactId = null }) => {
   const [objectionText, setObjectionText] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  const { mutate, data, loading, error } = useMutation();
-
+  const { mutate, data: d, loading, error } = useMutation();
+  const data = d?.data?.data?.data;
+  console.log(data, "qqqqqqqqqqqqqqqq");
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!objectionText.trim()) return;
@@ -35,6 +36,7 @@ const ObjectionHandler = ({ dealId = null }) => {
     const payload = {
       objection_text: objectionText,
       ...(dealId && { deal_id: dealId }),
+      ...(contactId && { contact_id: contactId }),
     };
 
     await mutate({
@@ -135,7 +137,7 @@ const ObjectionHandler = ({ dealId = null }) => {
 
                   <TabsContent value="responses">
                     <div className="space-y-4">
-                      {data?.data?.data?.responses?.map((response, index) => (
+                      {data?.responses?.map((response, index) => (
                         <Card key={index} className="overflow-hidden">
                           <CardContent className="p-4">
                             <div className="flex items-start gap-2">
@@ -150,18 +152,16 @@ const ObjectionHandler = ({ dealId = null }) => {
 
                   <TabsContent value="questions">
                     <div className="space-y-4">
-                      {data?.data?.data?.follow_up_questions?.map(
-                        (question, index) => (
-                          <Card key={index} className="overflow-hidden">
-                            <CardContent className="p-4">
-                              <div className="flex items-start gap-2">
-                                <HelpCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                                <p className="text-sm">{question}</p>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        )
-                      )}
+                      {data?.follow_up_questions?.map((question, index) => (
+                        <Card key={index} className="overflow-hidden">
+                          <CardContent className="p-4">
+                            <div className="flex items-start gap-2">
+                              <HelpCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                              <p className="text-sm">{question}</p>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
                     </div>
                   </TabsContent>
                 </Tabs>

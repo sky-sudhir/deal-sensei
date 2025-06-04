@@ -47,7 +47,6 @@ const CompanySchema = new mongoose.Schema(
 
 // Create indexes
 CompanySchema.index({ email: 1 });
-CompanySchema.index({ ai_embedding: "vector" }, { background: true });
 
 const CompanyModel = mongoose.model("company", CompanySchema);
 

@@ -30,6 +30,7 @@ import { Badge } from "@/components/ui/badge";
 import ActivityList from "@/components/activities/ActivityList";
 import FileList from "@/components/files/FileList";
 import { PersonaBuilder, ObjectionHandler } from "@/components/ai";
+import ChatBot from "../ai/ChatBot";
 
 const ContactDetail = () => {
   const { id } = useParams();
@@ -218,6 +219,7 @@ const ContactDetail = () => {
           <TabsTrigger value="activities">Activities</TabsTrigger>
           <TabsTrigger value="files">Files</TabsTrigger>
           <TabsTrigger value="ai-insights">AI Insights</TabsTrigger>
+          <TabsTrigger value="chatbot">Chatbot</TabsTrigger>
         </TabsList>
 
         <TabsContent value="deals" className="mt-4">
@@ -255,7 +257,7 @@ const ContactDetail = () => {
                       <div>
                         <h4 className="font-medium">{deal.title}</h4>
                         <p className="text-sm text-muted-foreground">
-                          Value: ${deal.value.toLocaleString()}
+                          Value: ₹{deal.value.toLocaleString()}
                         </p>
                       </div>
                       <Badge
@@ -279,7 +281,7 @@ const ContactDetail = () => {
         </TabsContent>
 
         <TabsContent value="activities" className="mt-4">
-          <ActivityList contactId={id} />
+          <ActivityList contact_id={id} />
         </TabsContent>
 
         <TabsContent value="files" className="mt-4">
@@ -292,8 +294,12 @@ const ContactDetail = () => {
             <PersonaBuilder contactId={id} />
 
             {/* Objection Handler */}
-            <ObjectionHandler />
+            <ObjectionHandler contactId={id} />
           </div>
+        </TabsContent>
+
+        <TabsContent value="chatbot" className="mt-4">
+          <ChatBot contact_id={id} />
         </TabsContent>
       </Tabs>
 

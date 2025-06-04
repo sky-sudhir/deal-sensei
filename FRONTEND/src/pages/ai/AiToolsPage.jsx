@@ -1,8 +1,21 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ObjectionHandler } from '@/components/ai';
-import { Brain, MessageSquare, Sparkles, Lightbulb } from 'lucide-react';
+import { ObjectionHandler } from "@/components/ai";
+import {
+  Brain,
+  MessageSquare,
+  Sparkles,
+  Lightbulb,
+  BotMessageSquare,
+} from "lucide-react";
+import ChatBot from "@/components/ai/ChatBot";
 
 const AiToolsPage = () => {
   return (
@@ -21,9 +34,16 @@ const AiToolsPage = () => {
 
       <Tabs defaultValue="objection-handler" className="w-full">
         <TabsList className="mb-4">
-          <TabsTrigger value="objection-handler" className="flex items-center gap-2">
+          <TabsTrigger
+            value="objection-handler"
+            className="flex items-center gap-2"
+          >
             <MessageSquare className="h-4 w-4" />
             <span>Objection Handler</span>
+          </TabsTrigger>
+          <TabsTrigger value="chatbot" className="flex items-center gap-2">
+            <BotMessageSquare className="h-4 w-4" />
+            <span>Chatbot</span>
           </TabsTrigger>
           <TabsTrigger value="coming-soon" className="flex items-center gap-2">
             <Sparkles className="h-4 w-4" />
@@ -35,6 +55,10 @@ const AiToolsPage = () => {
           <ObjectionHandler />
         </TabsContent>
 
+        <TabsContent value="chatbot">
+          <ChatBot />
+        </TabsContent>
+
         <TabsContent value="coming-soon">
           <Card>
             <CardHeader>
@@ -43,7 +67,8 @@ const AiToolsPage = () => {
                 More AI Tools Coming Soon
               </CardTitle>
               <CardDescription>
-                We're working on additional AI tools to help you sell more effectively
+                We're working on additional AI tools to help you sell more
+                effectively
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -51,19 +76,22 @@ const AiToolsPage = () => {
                 <div className="p-4 border rounded-lg">
                   <h3 className="font-medium">Email Template Generator</h3>
                   <p className="text-sm text-muted-foreground mt-1">
-                    AI-powered email templates tailored to your specific sales scenarios
+                    AI-powered email templates tailored to your specific sales
+                    scenarios
                   </p>
                 </div>
                 <div className="p-4 border rounded-lg">
                   <h3 className="font-medium">Competitive Analysis</h3>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Get AI insights on how to position against competitors mentioned in your deals
+                    Get AI insights on how to position against competitors
+                    mentioned in your deals
                   </p>
                 </div>
                 <div className="p-4 border rounded-lg">
                   <h3 className="font-medium">Sales Call Analyzer</h3>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Upload call recordings for AI analysis of sentiment, objections, and next steps
+                    Upload call recordings for AI analysis of sentiment,
+                    objections, and next steps
                   </p>
                 </div>
               </div>

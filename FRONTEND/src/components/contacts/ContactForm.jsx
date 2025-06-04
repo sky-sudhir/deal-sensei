@@ -4,6 +4,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { contactSchema } from "@/schemas/contactSchema";
 import useMutation from "@/hooks/useMutation";
 import useQuery from "@/hooks/useQuery";
+import { API_CONTACT_UPDATE, API_CONTACT_CREATE } from "@/imports/api.js";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -59,7 +60,7 @@ const ContactForm = ({
         email: initialData.email || "",
         phone: initialData.phone || "",
         notes: initialData.notes || "",
-        owner_id: initialData.owner_id || "",
+        owner_id: initialData.owner_id?._id || "",
       });
     }
   }, [initialData, form]);
@@ -68,9 +69,14 @@ const ContactForm = ({
     setIsSubmitting(true);
 
     try {
+      // Use the API constants from api.js to ensure correct endpoints
       const endpoint = isEdit
-        ? { url: `api/v1/contacts/${initialData._id}`, method: "PUT", data }
-        : { url: "api/v1/contacts", method: "POST", data };
+        ? {
+            url: `${API_CONTACT_UPDATE}${initialData._id}`,
+            method: "PUT",
+            data,
+          }
+        : { url: API_CONTACT_CREATE, method: "POST", data };
 
       const response = await mutate(endpoint);
 
@@ -82,7 +88,7 @@ const ContactForm = ({
         onClose();
       }
     } catch (error) {
-      console.error(error);
+      console.error("Error in contact form submission:", error);
     } finally {
       setIsSubmitting(false);
     }

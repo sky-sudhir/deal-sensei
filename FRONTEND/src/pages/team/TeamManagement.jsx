@@ -112,7 +112,7 @@ const TeamManagement = () => {
           {isAdmin && (
             <>
               <Button variant="outline" onClick={toggleShowInactive}>
-                {!showInactive ? "Hide Inactive Users" : "Show Inactive Users"}
+                {!showInactive ? "Hide Active Users" : "Show Active Users"}
               </Button>
 
               <Button onClick={() => setIsInviteDialogOpen(true)}>

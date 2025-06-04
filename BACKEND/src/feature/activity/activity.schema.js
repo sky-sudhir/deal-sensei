@@ -64,114 +64,76 @@ const ActivitySchema = new mongoose.Schema(
 
 // Index for company_id and created_at for efficient queries
 ActivitySchema.index({ company_id: 1, created_at: -1 });
-ActivitySchema.index({ deal_id: 1, created_at: -1 });
-ActivitySchema.index({ contact_id: 1, created_at: -1 });
-ActivitySchema.index({ user_id: 1, created_at: -1 });
-ActivitySchema.index({ ai_embedding: "vector" }, { background: true });
-
 // Middleware to generate embeddings on save and update
-ActivitySchema.pre("save", async function (next) {
+ActivitySchema.post("save", async function (doc) {
+  if (!doc) return;
   try {
-    // Only generate embedding if document is new or relevant fields have changed
-    if (
-      this.isNew ||
-      this.isModified("content") ||
-      this.isModified("subject") ||
-      this.isModified("type") ||
-      this.isModified("next_steps")
-    ) {
-      console.log(`Generating embedding for activity ${this._id}`);
-      const embeddingData = await createEntityEmbedding(this, "activity");
-      if (embeddingData && embeddingData.embedding_vector) {
-        this.ai_embedding = embeddingData.embedding_vector;
+    const ActivityRepository = (await import("./activity.repository.js"))
+      .default;
+    const activityRepo = new ActivityRepository();
+    const currentActivity = await activityRepo.getActivityById(
+      doc._id,
+      doc.company_id
+    );
+    const embeddingData = await createEntityEmbedding(
+      currentActivity,
+      "activity"
+    );
 
-        // Also store in the central AI embeddings collection
-        // Only if we have an _id (for new documents)
-        if (this._id) {
-          try {
-            // Import dynamically to avoid circular dependency
-            const AiRepository = (await import("../ai/ai.repository.js")).default;
-            const aiRepo = new AiRepository();
-            
-            await aiRepo.storeEmbedding(
-              "activity",
-              this._id,
-              this.company_id,
-              embeddingData.embedding_vector,
-              embeddingData.content_summary
-            );
-          } catch (storeError) {
-            console.error(
-              `Error storing embedding in central collection: ${storeError.message}`
-            );
-            // Continue even if central storage fails
-          }
-        }
+    if (embeddingData && embeddingData.embedding_vector) {
+      // Store in the central AI embeddings collection
+      try {
+        const AiRepository = (await import("../ai/ai.repository.js")).default;
+        const aiRepo = new AiRepository();
+
+        await aiRepo.storeEmbedding(
+          "activity",
+          doc._id,
+          doc.company_id,
+          embeddingData.embedding_vector,
+          embeddingData.content_summary,
+          doc.deal_id,
+          doc.contact_id
+        );
+      } catch (storeError) {
+        console.error(
+          `Error storing embedding in central collection: ${storeError.message}`
+        );
       }
     }
-    next();
   } catch (error) {
-    console.error(
-      `Error generating embedding for activity ${this._id}:`,
-      error
-    );
-    // Continue saving even if embedding generation fails
-    next();
+    console.error(`Error generating embedding for activity ${doc._id}:`, error);
   }
 });
 
 // Middleware for findOneAndUpdate operations
-ActivitySchema.pre("findOneAndUpdate", async function (next) {
+ActivitySchema.post("findOneAndUpdate", async function (doc) {
+  if (!doc) return;
   try {
-    const update = this.getUpdate();
-    const activityId = this.getQuery()._id;
+    const embeddingData = await createEntityEmbedding(doc, "activity");
 
-    // Check if relevant fields are being updated
-    if (update.content || update.subject || update.type || update.next_steps) {
-      // Get the updated document
-      const activity = await this.model.findOne(this.getQuery());
-      if (!activity) return next();
+    if (embeddingData && embeddingData.embedding_vector) {
+      try {
+        const AiRepository = (await import("../ai/ai.repository.js")).default;
+        const aiRepo = new AiRepository();
 
-      // Apply updates to the document (for embedding generation)
-      if (update.content) activity.content = update.content;
-      if (update.subject) activity.subject = update.subject;
-      if (update.type) activity.type = update.type;
-      if (update.next_steps) activity.next_steps = update.next_steps;
-
-      console.log(`Generating embedding for updated activity ${activityId}`);
-      const embeddingData = await createEntityEmbedding(activity, "activity");
-      if (embeddingData && embeddingData.embedding_vector) {
-        // Add the embedding to the update operation
-        this.setUpdate({
-          ...update,
-          ai_embedding: embeddingData.embedding_vector,
-        });
-
-        // Also store in the central AI embeddings collection
-        try {
-          // Import dynamically to avoid circular dependency
-          const AiRepository = (await import("../ai/ai.repository.js")).default;
-          const aiRepo = new AiRepository();
-          
-          await aiRepo.storeEmbedding(
-            "activity",
-            activityId,
-            activity.company_id,
-            embeddingData.embedding_vector,
-            embeddingData.content_summary
-          );
-        } catch (storeError) {
-          console.error(
-            `Error storing embedding in central collection: ${storeError.message}`
-          );
-          // Continue even if central storage fails
-        }
+        const res = await aiRepo.storeEmbedding(
+          "activity",
+          doc._id,
+          doc.company_id,
+          embeddingData.embedding_vector,
+          embeddingData.content_summary,
+          doc.deal_id,
+          doc.contact_id
+        );
+      } catch (storeError) {
+        console.error(
+          `Error storing embedding in central collection: ${storeError.message}`
+        );
       }
     }
-    next();
   } catch (error) {
-    console.error("Error in activity findOneAndUpdate middleware:", error);
-    next();
+    console.error("Error in activity findOneAndUpdate post middleware:", error);
   }
 });
 
