@@ -380,7 +380,7 @@ const DealDetail = () => {
         </TabsContent>
 
         <TabsContent value="files" className="mt-4">
-          <FileList entityType="deal" entityId={id} />
+          <FileList entityType="deal" entityId={id} deal_id={id} />
         </TabsContent>
 
         <TabsContent value="ai-insights" className="mt-4">

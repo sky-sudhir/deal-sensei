@@ -29,31 +29,6 @@ export async function generateEmbedding(text) {
 }
 
 /**
- * Generate a content summary for the given text
- * @param {string} text - The text to summarize
- * @returns {Promise<string>} - A promise that resolves to a summary
- */
-export async function generateContentSummary(prompt) {
-  try {
-    // Use the generative model
-    const generativeModel = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
-      generationConfig: { temperature: 0.3 },
-    });
-
-    // Generate summary
-    const result = await generativeModel.generateContent(prompt);
-    const summary = result.response.text();
-
-    return summary;
-  } catch (error) {
-    console.error("Error generating summary:", error);
-    // Return a default summary in case of error
-    return "No summary available.";
-  }
-}
-
-/**
  * Process text for embedding by cleaning and normalizing
  * @param {string} text - The text to process
  * @returns {string} - The processed text
@@ -142,6 +117,22 @@ export async function createEntityEmbedding(entity, entityType) {
           entity.updated_at
         }. `;
         contentSummary = `Activity: ${entity.subject}`;
+        break;
+      case "file":
+        textToEmbed = `File Name: ${entity.filename}. File Type: ${
+          entity.file_type
+        }. File URL: ${entity.s3_url}. Attached To: ${
+          entity.attached_to_type
+        }.${
+          entity?.contact_id
+            ? ` Contact Name: ${entity?.contact_id?.name}. Contact Email: ${entity?.contact_id?.email}`
+            : ""
+        }.${
+          entity?.deal_id
+            ? ` Deal Title: ${entity?.deal_id?.title}. Deal Value: ${entity?.deal_id?.value}`
+            : ""
+        }. Updated At: ${entity.updated_at}`;
+        contentSummary = `File: ${entity.filename}`;
         break;
       // case "email_template":
       //   textToEmbed = `Id: ${entity._id}. Template: ${entity.name}. Subject: ${entity.subject}. Body: ${entity.body} Updated At: ${entity.updated_at}`;
