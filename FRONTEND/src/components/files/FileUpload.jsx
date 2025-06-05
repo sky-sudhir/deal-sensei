@@ -24,7 +24,15 @@ import { showToast } from "@/utils/toast";
 import { getToken } from "@/imports/localStorage";
 import { cn } from "@/lib/utils";
 
-const FileUpload = ({ isOpen, onClose, onSuccess, entityType, entityId }) => {
+const FileUpload = ({
+  isOpen,
+  onClose,
+  onSuccess,
+  entityType,
+  entityId,
+  deal_id,
+  contact_id,
+}) => {
   const [file, setFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -78,6 +86,14 @@ const FileUpload = ({ isOpen, onClose, onSuccess, entityType, entityId }) => {
     if (entityType && entityId) {
       formData.append("attached_to_type", entityType);
       formData.append("attached_to_id", entityId);
+    }
+
+    if (deal_id) {
+      formData.append("deal_id", deal_id);
+    }
+
+    if (contact_id) {
+      formData.append("contact_id", contact_id);
     }
 
     try {

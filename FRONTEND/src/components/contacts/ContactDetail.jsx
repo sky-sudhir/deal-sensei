@@ -285,7 +285,7 @@ const ContactDetail = () => {
         </TabsContent>
 
         <TabsContent value="files" className="mt-4">
-          <FileList entityType="contact" entityId={id} />
+          <FileList entityType="contact" entityId={id} contact_id={id} />
         </TabsContent>
 
         <TabsContent value="ai-insights" className="mt-4">

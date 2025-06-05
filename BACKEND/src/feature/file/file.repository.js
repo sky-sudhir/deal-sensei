@@ -30,13 +30,13 @@ class FileRepository {
     try {
       const { page = 1, limit = 10, sort = "-created_at", search } = options;
       const skip = (page - 1) * limit;
-      
+
       // Handle search parameter if provided
       if (search) {
         // Create a text search filter
         filters.$or = [
-          { filename: { $regex: search, $options: 'i' } },
-          { file_type: { $regex: search, $options: 'i' } }
+          { filename: { $regex: search, $options: "i" } },
+          { file_type: { $regex: search, $options: "i" } },
         ];
       }
 
@@ -69,15 +69,16 @@ class FileRepository {
   /**
    * Get a single file attachment by ID
    * @param {string} fileId - File attachment ID
-   * @param {string} companyId - Company ID
    * @returns {Promise<Object>} File attachment
    */
-  async getFileAttachmentById(fileId, companyId) {
+  async getFileAttachmentById(fileId) {
     try {
       const fileAttachment = await FileAttachment.findOne({
         _id: fileId,
-        company_id: companyId,
-      }).populate("uploaded_by", "name email");
+      })
+        .populate("uploaded_by", "name email")
+        .populate("deal_id", "title value")
+        .populate("contact_id", "name email");
 
       if (!fileAttachment) {
         throw new CustomError("File attachment not found", 404);
@@ -97,14 +98,12 @@ class FileRepository {
   /**
    * Delete a file attachment
    * @param {string} fileId - File attachment ID
-   * @param {string} companyId - Company ID
    * @returns {Promise<boolean>} Success status
    */
-  async deleteFileAttachment(fileId, companyId) {
+  async deleteFileAttachment(fileId) {
     try {
       const fileAttachment = await FileAttachment.findOne({
         _id: fileId,
-        company_id: companyId,
       });
 
       if (!fileAttachment) {
@@ -143,13 +142,6 @@ class FileRepository {
     options
   ) {
     try {
-      console.log("getFileAttachmentsByEntity params:", {
-        attachedToId,
-        attachedToType,
-        companyId,
-        options,
-      });
-
       if (!companyId) {
         console.error("Company ID is missing in getFileAttachmentsByEntity");
       }
@@ -159,11 +151,6 @@ class FileRepository {
         attached_to_type: attachedToType,
         company_id: companyId,
       };
-
-      console.log(
-        "Filters in getFileAttachmentsByEntity:",
-        JSON.stringify(filters)
-      );
 
       return await this.getFileAttachments(filters, options);
     } catch (error) {

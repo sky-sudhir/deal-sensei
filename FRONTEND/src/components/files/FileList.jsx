@@ -27,7 +27,7 @@ import FileUpload from "./FileUpload";
 import { formatDistanceToNow } from "date-fns";
 import { showToast } from "@/utils/toast";
 
-const FileList = ({ entityType, entityId }) => {
+const FileList = ({ entityType, entityId, deal_id, contact_id }) => {
   const [page, setPage] = useState(1);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -56,7 +56,8 @@ const FileList = ({ entityType, entityId }) => {
         color: "bg-gradient-to-r from-blue-400 via-blue-500 to-indigo-500",
         textColor: "text-blue-500",
         hoverBg: "group-hover:bg-blue-50 dark:group-hover:bg-blue-950/20",
-        borderColor: "group-hover:border-blue-200 dark:group-hover:border-blue-800"
+        borderColor:
+          "group-hover:border-blue-200 dark:group-hover:border-blue-800",
       };
     } else if (fileType === "application/pdf") {
       return {
@@ -64,7 +65,8 @@ const FileList = ({ entityType, entityId }) => {
         color: "bg-gradient-to-r from-red-400 via-red-500 to-rose-500",
         textColor: "text-red-500",
         hoverBg: "group-hover:bg-red-50 dark:group-hover:bg-red-950/20",
-        borderColor: "group-hover:border-red-200 dark:group-hover:border-red-800"
+        borderColor:
+          "group-hover:border-red-200 dark:group-hover:border-red-800",
       };
     } else if (fileType.startsWith("text/")) {
       return {
@@ -72,31 +74,46 @@ const FileList = ({ entityType, entityId }) => {
         color: "bg-gradient-to-r from-green-400 via-green-500 to-emerald-500",
         textColor: "text-green-500",
         hoverBg: "group-hover:bg-green-50 dark:group-hover:bg-green-950/20",
-        borderColor: "group-hover:border-green-200 dark:group-hover:border-green-800"
+        borderColor:
+          "group-hover:border-green-200 dark:group-hover:border-green-800",
       };
-    } else if (fileType.includes("spreadsheet") || fileType.includes("excel") || fileType.includes("csv")) {
+    } else if (
+      fileType.includes("spreadsheet") ||
+      fileType.includes("excel") ||
+      fileType.includes("csv")
+    ) {
       return {
         icon: <FileTextIcon className="h-5 w-5" />,
         color: "bg-gradient-to-r from-emerald-400 via-emerald-500 to-teal-500",
         textColor: "text-emerald-500",
         hoverBg: "group-hover:bg-emerald-50 dark:group-hover:bg-emerald-950/20",
-        borderColor: "group-hover:border-emerald-200 dark:group-hover:border-emerald-800"
+        borderColor:
+          "group-hover:border-emerald-200 dark:group-hover:border-emerald-800",
       };
-    } else if (fileType.includes("presentation") || fileType.includes("powerpoint")) {
+    } else if (
+      fileType.includes("presentation") ||
+      fileType.includes("powerpoint")
+    ) {
       return {
         icon: <FileTextIcon className="h-5 w-5" />,
         color: "bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500",
         textColor: "text-amber-500",
         hoverBg: "group-hover:bg-amber-50 dark:group-hover:bg-amber-950/20",
-        borderColor: "group-hover:border-amber-200 dark:group-hover:border-amber-800"
+        borderColor:
+          "group-hover:border-amber-200 dark:group-hover:border-amber-800",
       };
-    } else if (fileType.includes("zip") || fileType.includes("archive") || fileType.includes("compressed")) {
+    } else if (
+      fileType.includes("zip") ||
+      fileType.includes("archive") ||
+      fileType.includes("compressed")
+    ) {
       return {
         icon: <FileTextIcon className="h-5 w-5" />,
         color: "bg-gradient-to-r from-purple-400 via-purple-500 to-violet-500",
         textColor: "text-purple-500",
         hoverBg: "group-hover:bg-purple-50 dark:group-hover:bg-purple-950/20",
-        borderColor: "group-hover:border-purple-200 dark:group-hover:border-purple-800"
+        borderColor:
+          "group-hover:border-purple-200 dark:group-hover:border-purple-800",
       };
     } else {
       return {
@@ -104,7 +121,8 @@ const FileList = ({ entityType, entityId }) => {
         color: "bg-gradient-to-r from-gray-400 via-gray-500 to-slate-500",
         textColor: "text-gray-500",
         hoverBg: "group-hover:bg-gray-50 dark:group-hover:bg-gray-800/20",
-        borderColor: "group-hover:border-gray-200 dark:group-hover:border-gray-700"
+        borderColor:
+          "group-hover:border-gray-200 dark:group-hover:border-gray-700",
       };
     }
   };
@@ -151,8 +169,8 @@ const FileList = ({ entityType, entityId }) => {
           Files
           <span className="absolute -bottom-1 left-0 w-1/2 h-1 bg-gradient-to-r from-primary to-accent rounded-full"></span>
         </h2>
-        <Button 
-          onClick={() => setIsUploadModalOpen(true)} 
+        <Button
+          onClick={() => setIsUploadModalOpen(true)}
           className="relative overflow-hidden group"
         >
           <span className="absolute inset-0 bg-gradient-to-r from-primary/0 via-white/10 to-primary/0 group-hover:translate-x-full -translate-x-full transition-transform duration-1000"></span>
@@ -175,8 +193,10 @@ const FileList = ({ entityType, entityId }) => {
               <File className="h-8 w-8 text-muted-foreground/60" />
               <span className="absolute -right-1 -top-1 text-lg">+</span>
             </div>
-            <p className="text-muted-foreground mb-4 text-center">No files uploaded yet</p>
-            <Button 
+            <p className="text-muted-foreground mb-4 text-center">
+              No files uploaded yet
+            </p>
+            <Button
               onClick={() => setIsUploadModalOpen(true)}
               className="relative overflow-hidden group bg-gradient-to-r from-primary to-accent hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5"
             >
@@ -191,20 +211,24 @@ const FileList = ({ entityType, entityId }) => {
             {files.map((file) => {
               const fileTypeInfo = getFileTypeInfo(file.file_type);
               return (
-                <Card 
-                  key={file._id} 
+                <Card
+                  key={file._id}
                   className={`overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group border border-border/40 ${fileTypeInfo.borderColor} ${fileTypeInfo.hoverBg}`}
                 >
                   <CardContent className="p-4 relative">
                     {/* Top accent line */}
-                    <div className={`absolute top-0 left-0 right-0 h-0.5 ${fileTypeInfo.color} transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300`}></div>
-                    
+                    <div
+                      className={`absolute top-0 left-0 right-0 h-0.5 ${fileTypeInfo.color} transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300`}
+                    ></div>
+
                     {/* Subtle gradient background that appears on hover */}
                     <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-background to-accent/20"></div>
-                    
+
                     <div className="flex items-center justify-between relative z-10">
                       <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div className={`p-2.5 rounded-md ${fileTypeInfo.color} text-white shadow-sm group-hover:shadow-md transition-all duration-300 group-hover:scale-110`}>
+                        <div
+                          className={`p-2.5 rounded-md ${fileTypeInfo.color} text-white shadow-sm group-hover:shadow-md transition-all duration-300 group-hover:scale-110`}
+                        >
                           {fileTypeInfo.icon}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -214,7 +238,9 @@ const FileList = ({ entityType, entityId }) => {
                           >
                             <span className="relative inline-block">
                               {file.original_filename}
-                              <span className={`absolute bottom-0 left-0 w-0 h-0.5 ${fileTypeInfo.color} group-hover:w-full transition-all duration-500 rounded-full opacity-70`}></span>
+                              <span
+                                className={`absolute bottom-0 left-0 w-0 h-0.5 ${fileTypeInfo.color} group-hover:w-full transition-all duration-500 rounded-full opacity-70`}
+                              ></span>
                             </span>
                           </p>
                           <div className="flex flex-wrap gap-x-4 text-xs text-muted-foreground">
@@ -281,6 +307,8 @@ const FileList = ({ entityType, entityId }) => {
         onSuccess={refetch}
         entityType={entityType}
         entityId={entityId}
+        deal_id={deal_id}
+        contact_id={contact_id}
       />
 
       {/* Delete Confirmation Dialog */}

@@ -41,6 +41,8 @@ class FileController {
         s3_url: location,
         uploaded_by: user.userId,
         company_id: user.company_id,
+        deal_id: req.body.deal_id,
+        contact_id: req.body.contact_id,
       };
 
       // Only add attached_to_type and attached_to_id if they are provided

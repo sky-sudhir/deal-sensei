@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { createEntityEmbedding } from "../../utils/aiUtils.js";
 
 const fileAttachmentSchema = new mongoose.Schema(
   {
@@ -40,6 +41,16 @@ const fileAttachmentSchema = new mongoose.Schema(
         return this.attached_to_type !== "general";
       },
     },
+    deal_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "deal",
+      required: false,
+    },
+    contact_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "contact",
+      required: false,
+    },
     uploaded_by: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
@@ -61,12 +72,41 @@ const fileAttachmentSchema = new mongoose.Schema(
 // Index for company_id and created_at for efficient queries
 fileAttachmentSchema.index({ company_id: 1, created_at: -1 });
 
-// Ensure files can only be viewed by users in the same company
-fileAttachmentSchema.pre("find", function () {
-  if (this._conditions.company_id === undefined) {
-    console.warn("WARNING: company_id is missing from file query");
-    // Don't throw error for debugging purposes
-    // throw new Error("company_id must be provided for file queries");
+fileAttachmentSchema.post("save", async function (doc) {
+  if (!doc) return;
+  try {
+    const FileAttachmentRepository = (await import("./file.repository.js"))
+      .default;
+    const fileAttachmentRepo = new FileAttachmentRepository();
+    const currentFileAttachment =
+      await fileAttachmentRepo.getFileAttachmentById(doc._id);
+    const embeddingData = await createEntityEmbedding(
+      currentFileAttachment,
+      "file"
+    );
+    if (embeddingData && embeddingData.embedding_vector) {
+      // Store in the central AI embeddings collection
+      try {
+        const AiRepository = (await import("../ai/ai.repository.js")).default;
+        const aiRepo = new AiRepository();
+
+        await aiRepo.storeEmbedding(
+          "file",
+          doc._id,
+          doc.company_id,
+          embeddingData.embedding_vector,
+          embeddingData.content_summary,
+          doc.deal_id,
+          doc.contact_id
+        );
+      } catch (storeError) {
+        console.error(
+          `Error storing embedding in central collection: ${storeError.message}`
+        );
+      }
+    }
+  } catch (error) {
+    console.error("Error generating embeddings for file attachment:", error);
   }
 });
 
