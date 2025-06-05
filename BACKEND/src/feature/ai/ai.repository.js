@@ -99,14 +99,14 @@ class AiRepository {
     limit = 5
   ) {
     try {
-      const andFilters = [];
-
-      andFilters.push({
+      const finalFilter = {
         company_id: Types.ObjectId.createFromHexString(companyId),
-      });
+      };
+
+      const orConditions = [];
 
       if (Array.isArray(contactIds) && contactIds.length > 0) {
-        andFilters.push({
+        orConditions.push({
           contact_id: {
             $in: contactIds.map((id) => Types.ObjectId.createFromHexString(id)),
           },
@@ -114,25 +114,17 @@ class AiRepository {
       }
 
       if (Array.isArray(dealIds) && dealIds.length > 0) {
-        andFilters.push({
+        orConditions.push({
           deal_id: {
             $in: dealIds.map((id) => Types.ObjectId.createFromHexString(id)),
           },
         });
       }
 
-      let finalFilter = {};
-
-      if (andFilters.length === 1) {
-        // Only one condition (company_id)
-        finalFilter = andFilters[0];
-      } else if (andFilters.length > 1) {
-        // More than one condition: use $and
-        finalFilter = { $and: andFilters };
+      if (orConditions.length > 0) {
+        finalFilter.$or = orConditions;
       }
-
       // console.log(finalFilter, "wwwwwwwwwwwwwwwwww");
-
       const results = await AiEmbedding.aggregate([
         {
           $vectorSearch: {

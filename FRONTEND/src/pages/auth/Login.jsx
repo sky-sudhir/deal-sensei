@@ -59,23 +59,28 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex flex-col px-4">
-      {/* Header */}
-      <header className="container mx-auto py-6">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-md bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold">
-            DS
-          </div>
-          <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
-            DealSensei
-          </span>
-        </Link>
-      </header>
-
       {/* Login Form */}
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md space-y-6 bg-card p-8 rounded-xl shadow-lg border border-border/40 relative overflow-hidden">
           <div className="text-center">
-            <h1 className="text-2xl font-bold">Sign in to DealSensei</h1>
+            <div className="flex items-center justify-center gap-2">
+              <h1 className="text-2xl font-bold">Sign in to</h1>
+              <div className="flex items-center gap-2 group relative">
+                <div className="w-9 h-9 rounded-md bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-110 relative overflow-hidden">
+                  {/* Animated gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-accent to-primary opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                  {/* Shine effect */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                    <div className="absolute inset-0 translate-x-full group-hover:translate-x-[-180%] transition-transform duration-1500 bg-white/20 skew-x-[45deg]"></div>
+                  </div>
+                  <span className="relative z-10">DS</span>
+                </div>
+                <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent group-hover:from-accent group-hover:to-primary transition-all duration-500 relative">
+                  DealSensei
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-accent group-hover:w-full transition-all duration-500 rounded-full"></span>
+                </span>
+              </div>
+            </div>
             <p className="text-muted-foreground mt-2">
               Enter your credentials to access your account
             </p>
