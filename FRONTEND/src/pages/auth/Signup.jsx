@@ -29,9 +29,6 @@ const signupSchema = yup.object({
       .min(8, "Password must be at least 8 characters")
       .required("Password is required"),
   }),
-  termsAccepted: yup
-    .boolean()
-    .oneOf([true], "You must accept the terms and conditions"),
 });
 
 const Signup = () => {
@@ -54,14 +51,10 @@ const Signup = () => {
         email: "",
         password: "",
       },
-      termsAccepted: false,
     },
   });
 
-  const onSubmit = async (data) => {
-    // Remove termsAccepted from the payload
-    const { termsAccepted, ...signupData } = data;
-
+  const onSubmit = async (signupData) => {
     const resultAction = await mutate({
       data: signupData,
       method: "POST",
@@ -79,27 +72,33 @@ const Signup = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background/95 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-background to-background px-4 ">
       {/* Header */}
-      <header className="container mx-auto py-6">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-md bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold">
-            DS
-          </div>
-          <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
-            DealSensei
-          </span>
-        </Link>
-      </header>
 
       {/* Signup Form */}
       <div className="flex-1 flex items-center justify-center px-4 py-8">
-        <div className="w-full max-w-md space-y-6 bg-card p-8 rounded-xl shadow-lg border border-border/40 relative overflow-hidden">
+        <div className="w-full max-w-screen-md space-y-6 bg-card p-8 rounded-xl shadow-lg border border-border/40 relative overflow-hidden">
           {/* Background decorative elements */}
           <div className="absolute -top-24 -right-24 w-48 h-48 rounded-full bg-primary/5 blur-2xl"></div>
           <div className="absolute -bottom-24 -left-24 w-48 h-48 rounded-full bg-accent/5 blur-2xl"></div>
           <div className="text-center relative">
-            <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
-              Create your DealSensei Account
-            </h1>
+            <div className="flex items-center justify-center gap-2">
+              <h1 className="text-2xl font-bold">Create your </h1>
+              <div className="flex items-center gap-2 group relative">
+                <div className="w-9 h-9 rounded-md bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-110 relative overflow-hidden">
+                  {/* Animated gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-accent to-primary opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                  {/* Shine effect */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                    <div className="absolute inset-0 translate-x-full group-hover:translate-x-[-180%] transition-transform duration-1500 bg-white/20 skew-x-[45deg]"></div>
+                  </div>
+                  <span className="relative z-10">DS</span>
+                </div>
+                <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent group-hover:from-accent group-hover:to-primary transition-all duration-500 relative">
+                  DealSensei
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-accent group-hover:w-full transition-all duration-500 rounded-full"></span>
+                </span>
+              </div>
+              <h1 className="text-2xl font-bold">Account</h1>
+            </div>
             <p className="text-muted-foreground mt-2">
               Start your free trial. No credit card required.
             </p>
@@ -113,36 +112,37 @@ const Signup = () => {
                 <span>Company Information</span>
               </h2>
 
-              <div className="space-y-2">
-                <Label htmlFor="company.name">Company Name</Label>
-                <Input
-                  id="company.name"
-                  placeholder="Acme Inc."
-                  {...register("company.name")}
-                  error={errors.company?.name?.message}
-                  className="shadow-sm hover:shadow"
-                />
-                {errors.company?.name && (
-                  <p className="text-sm text-destructive">
-                    {errors.company.name.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="company.email">Company Email</Label>
-                <Input
-                  id="company.email"
-                  type="email"
-                  placeholder="company@example.com"
-                  {...register("company.email")}
-                  className="shadow-sm hover:shadow"
-                />
-                {errors.company?.email && (
-                  <p className="text-sm text-destructive">
-                    {errors.company.email.message}
-                  </p>
-                )}
+              <div className="flex gap-4 w-full">
+                <div className="space-y-2 w-full">
+                  <Label htmlFor="company.name">Company Name</Label>
+                  <Input
+                    id="company.name"
+                    placeholder="Acme Inc."
+                    {...register("company.name")}
+                    error={errors.company?.name?.message}
+                    className="shadow-sm hover:shadow"
+                  />
+                  {errors.company?.name && (
+                    <p className="text-sm text-destructive">
+                      {errors.company.name.message}
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-2 w-full">
+                  <Label htmlFor="company.email">Company Email</Label>
+                  <Input
+                    id="company.email"
+                    type="email"
+                    placeholder="company@example.com"
+                    {...register("company.email")}
+                    className="shadow-sm hover:shadow"
+                  />
+                  {errors.company?.email && (
+                    <p className="text-sm text-destructive">
+                      {errors.company.email.message}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -153,35 +153,36 @@ const Signup = () => {
                 <span>Admin Account</span>
               </h2>
 
-              <div className="space-y-2">
-                <Label htmlFor="admin.name">Your Name</Label>
-                <Input
-                  id="admin.name"
-                  placeholder="John Doe"
-                  {...register("admin.name")}
-                  className="shadow-sm hover:shadow"
-                />
-                {errors.admin?.name && (
-                  <p className="text-sm text-destructive">
-                    {errors.admin.name.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="admin.email">Your Email</Label>
-                <Input
-                  id="admin.email"
-                  type="email"
-                  placeholder="you@example.com"
-                  {...register("admin.email")}
-                  className="shadow-sm hover:shadow"
-                />
-                {errors.admin?.email && (
-                  <p className="text-sm text-destructive">
-                    {errors.admin.email.message}
-                  </p>
-                )}
+              <div className="flex gap-4 w-full">
+                <div className="space-y-2 w-full">
+                  <Label htmlFor="admin.name">Your Name</Label>
+                  <Input
+                    id="admin.name"
+                    placeholder="John Doe"
+                    {...register("admin.name")}
+                    className="shadow-sm hover:shadow"
+                  />
+                  {errors.admin?.name && (
+                    <p className="text-sm text-destructive">
+                      {errors.admin.name.message}
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-2 w-full">
+                  <Label htmlFor="admin.email">Your Email</Label>
+                  <Input
+                    id="admin.email"
+                    type="email"
+                    placeholder="you@example.com"
+                    {...register("admin.email")}
+                    className="shadow-sm hover:shadow"
+                  />
+                  {errors.admin?.email && (
+                    <p className="text-sm text-destructive">
+                      {errors.admin.email.message}
+                    </p>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -203,36 +204,6 @@ const Signup = () => {
                   Password must be at least 8 characters
                 </p>
               </div>
-            </div>
-
-            {/* Terms and Conditions */}
-            <div className="flex items-start space-x-2 pb-6">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="termsAccepted"
-                  onCheckedChange={(checked) => {
-                    // This ensures the register function gets the correct value
-                    const event = {
-                      target: {
-                        name: "termsAccepted",
-                        value: checked,
-                      },
-                    };
-                    register("termsAccepted").onChange(event);
-                  }}
-                />
-                <label
-                  htmlFor="termsAccepted"
-                  className="text-sm font-medium leading-none cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  I agree to the Terms of Service and Privacy Policy
-                </label>
-              </div>
-              {errors.termsAccepted && (
-                <p className="text-sm text-destructive absolute mt-6">
-                  {errors.termsAccepted.message}
-                </p>
-              )}
             </div>
 
             <Button

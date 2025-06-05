@@ -194,9 +194,11 @@ class AiController {
         const contact = await this.contactRepository.findContactById(
           contact_id
         );
-        textToEmbed = `Current Contact( Contact Name: ${contact.name}. Email: ${
-          contact.email || ""
-        }. Phone: ${contact.phone || ""}. Notes: ${contact.notes || ""}.`;
+        textToEmbed = `Contact Details ( Contact Name: ${
+          contact.name
+        }. Email: ${contact.email || ""}. Phone: ${
+          contact.phone || ""
+        }. Notes: ${contact.notes || ""}.`;
       }
 
       if (deal_id) {
@@ -206,15 +208,18 @@ class AiController {
           ...similarContacts.contact_ids.map((c) => c._id.toString())
         );
         const deal = await this.dealRepository.findDealById(deal_id);
-        textToEmbed = `Current Deal(Deal Title: ${deal.title}. Value: ${
+        textToEmbed = `Deal Details ( Deal Title: ${deal.title}. Value: ${
           deal.value
         }.Deal Amount: ${deal.value} Stage: ${deal.stage}. Status: ${
           deal.status || "open"
+        }. Win Probability : ${
+          deal.pipeline_id.stages.find((stage) => stage.name === deal.stage)
+            ?.win_probability || ""
         }. Close Date: ${deal.close_date || ""}. Notes: ${
           deal.notes || ""
-        } Stage Duration : ${deal.stage_duration_days} Total Deal Duration : ${
-          deal.total_deal_duration_days
-        } )`;
+        } Stage Duration : ${
+          deal.stage_duration_days
+        }.  Total Deal Duration : ${deal.total_deal_duration_days} )`;
       }
 
       // Generate embedding for the objection text
