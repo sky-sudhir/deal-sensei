@@ -323,8 +323,8 @@ const DealDetail = () => {
           <TabsTrigger value="contacts">Contacts</TabsTrigger>
           <TabsTrigger value="activities">Activities</TabsTrigger>
           <TabsTrigger value="files">Files</TabsTrigger>
-          <TabsTrigger value="ai-insights">AI Insights</TabsTrigger>
           <TabsTrigger value="chatbot">Chatbot</TabsTrigger>
+          <TabsTrigger value="ai-insights">AI Insights</TabsTrigger>
         </TabsList>
 
         <TabsContent value="contacts" className="mt-4">
