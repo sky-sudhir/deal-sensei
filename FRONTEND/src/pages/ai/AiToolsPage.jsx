@@ -32,18 +32,18 @@ const AiToolsPage = () => {
         </div>
       </div>
 
-      <Tabs defaultValue="objection-handler" className="w-full">
+      <Tabs defaultValue="chatbot" className="w-full">
         <TabsList className="mb-4">
+          <TabsTrigger value="chatbot" className="flex items-center gap-2">
+            <BotMessageSquare className="h-4 w-4" />
+            <span>Chatbot</span>
+          </TabsTrigger>
           <TabsTrigger
             value="objection-handler"
             className="flex items-center gap-2"
           >
             <MessageSquare className="h-4 w-4" />
             <span>Objection Handler</span>
-          </TabsTrigger>
-          <TabsTrigger value="chatbot" className="flex items-center gap-2">
-            <BotMessageSquare className="h-4 w-4" />
-            <span>Chatbot</span>
           </TabsTrigger>
           <TabsTrigger value="coming-soon" className="flex items-center gap-2">
             <Sparkles className="h-4 w-4" />

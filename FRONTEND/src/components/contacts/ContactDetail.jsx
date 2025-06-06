@@ -218,8 +218,8 @@ const ContactDetail = () => {
           <TabsTrigger value="deals">Deals</TabsTrigger>
           <TabsTrigger value="activities">Activities</TabsTrigger>
           <TabsTrigger value="files">Files</TabsTrigger>
-          <TabsTrigger value="ai-insights">AI Insights</TabsTrigger>
           <TabsTrigger value="chatbot">Chatbot</TabsTrigger>
+          <TabsTrigger value="ai-insights">AI Insights</TabsTrigger>
         </TabsList>
 
         <TabsContent value="deals" className="mt-4">
