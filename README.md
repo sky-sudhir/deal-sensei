@@ -1,6 +1,10 @@
 # DealSensei - AI-Powered CRM Platform
 
-![DealSensei]
+## URL https://dealsensei.netlify.app/
+
+## Username: sudhiratmasai@gmail.com
+
+## Password: demo@123
 
 ## 🚀 Overview
 

@@ -24,7 +24,7 @@ import { Button } from "../ui/button";
 import { motion } from "framer-motion";
 
 // Function to get section-specific colors
-const getSectionColor = (title) => {
+const getSectionColor = (section) => {
   return {
     gradient: "from-primary via-primary/90 to-accent",
     hoverGradient: "from-accent via-primary/90 to-primary",
@@ -38,109 +38,69 @@ const getSectionColor = (title) => {
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const location = useLocation();
-  const [activeGroup, setActiveGroup] = useState(null);
   const { user } = useSelector((state) => state.user);
   const isAdmin = user?.role === "admin";
 
-  // Define sidebar navigation items
+  // Define flattened sidebar navigation items
   const sidebarItems = [
     {
-      title: "Overview",
-      items: [
-        {
-          name: "Dashboard",
-          path: "/dashboard",
-          icon: PieChart,
-        },
-      ],
+      name: "Dashboard",
+      path: "/dashboard",
+      icon: PieChart,
+      section: "Overview",
     },
     {
-      title: "Sales",
-      items: [
-        {
-          name: "Deals",
-          path: "/deals",
-          icon: IndianRupee,
-        },
-        {
-          name: "Pipelines",
-          path: "/pipelines",
-          icon: Layers,
-        },
-      ],
+      name: "Pipelines",
+      path: "/pipelines",
+      icon: Layers,
+      section: "Sales",
     },
     {
-      title: "Contacts",
-      items: [
-        {
-          name: "Contacts",
-          path: "/contacts",
-          icon: Users,
-        },
-      ],
+      name: "Contacts",
+      path: "/contacts",
+      icon: Users,
+      section: "Contacts",
     },
     {
-      title: "Activities",
-      items: [
-        {
-          name: "Activities",
-          path: "/activities",
-          icon: Calendar,
-        },
-        {
-          name: "Files",
-          path: "/files",
-          icon: FileText,
-        },
-      ],
+      name: "Deals",
+      path: "/deals",
+      icon: IndianRupee,
+      section: "Sales",
     },
-
     {
-      title: "AI Tools",
-      items: [
-        {
-          name: "AI Tools",
-          path: "/ai-tools",
-          icon: Brain,
-        },
-      ],
+      name: "Activities",
+      path: "/activities",
+      icon: Calendar,
+      section: "Activities",
+    },
+    {
+      name: "Files",
+      path: "/files",
+      icon: FileText,
+      section: "Activities",
+    },
+    {
+      name: "AI Tools",
+      path: "/ai-tools",
+      icon: Brain,
+      section: "AI Tools",
     },
     ...(isAdmin
       ? [
           {
-            title: "Administration",
-            items: [
-              {
-                name: "Team Management",
-                path: "/team",
-                icon: UserCog,
-              },
-            ],
+            name: "Team Management",
+            path: "/team",
+            icon: UserCog,
+            section: "Administration",
           },
         ]
       : []),
   ];
 
-  // Toggle sidebar group
-  const toggleGroup = (title) => {
-    setActiveGroup(activeGroup === title ? null : title);
-  };
-
   // Check if path is active
   const isActive = (path) => {
     return location.pathname === path;
   };
-
-  // Initialize active group based on current path
-  useEffect(() => {
-    const currentGroup = sidebarItems.find((group) =>
-      group.items.some((item) => isActive(item.path))
-    );
-
-    if (currentGroup) {
-      setActiveGroup(currentGroup.title);
-    }
-  }, [location.pathname]);
 
   return (
     <aside
@@ -196,153 +156,82 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         {/* Subtle background pattern */}
         <div className="absolute inset-0 opacity-5 pointer-events-none bg-[radial-gradient(circle_at_center,_var(--primary)_1px,_transparent_1px)] bg-[size:20px_20px]"></div>
         <nav className="space-y-3 relative z-10">
-          {sidebarItems.map((group) => (
-            <div key={group.title} className="mb-4">
-              <button
-                onClick={() => toggleGroup(group.title)}
+          {sidebarItems.map((item) => (
+            <Link
+              key={item.name}
+              to={item.path}
+              className={cn(
+                "flex items-center gap-3 px-4 py-2.5 text-sm rounded-md transition-all duration-300",
+                "group relative overflow-hidden",
+                isActive(item.path)
+                  ? `bg-gradient-to-r from-${
+                      getSectionColor(item.section).bgLight
+                    } to-transparent dark:from-${
+                      getSectionColor(item.section).bgDark
+                    } dark:to-transparent text-foreground font-medium shadow-sm`
+                  : "text-foreground/80 hover:bg-muted/30"
+              )}
+            >
+              {/* Hover effect - subtle gradient */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-background to-accent/20"></div>
+
+              {/* Icon container with gradient background */}
+              <div
                 className={cn(
-                  "flex items-center justify-between w-full px-3 py-2 text-sm font-medium",
-                  "transition-all duration-300 rounded-md overflow-hidden relative",
-                  "border border-transparent",
-                  activeGroup === group.title
+                  "p-1.5 rounded-md transition-all duration-300 relative overflow-hidden",
+                  isActive(item.path)
                     ? `bg-gradient-to-r ${
-                        getSectionColor(group.title).gradient
-                      } bg-opacity-10 text-foreground shadow-sm ${
-                        getSectionColor(group.title).shadowColor
-                      } ${getSectionColor(group.title).borderColor}`
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                        getSectionColor(item.section).gradient
+                      } text-white shadow-md`
+                    : "bg-muted/40 text-muted-foreground group-hover:text-foreground group-hover:shadow-sm group-hover:bg-muted/60"
                 )}
               >
-                {/* Animated background for active group */}
-                {activeGroup === group.title && (
-                  <div className="absolute inset-0 opacity-10 bg-gradient-to-r from-white/0 via-white/20 to-white/0 animate-shimmer"></div>
-                )}
-
-                {/* Left accent bar */}
-                {activeGroup === group.title && (
+                {/* Animated gradient overlay on hover */}
+                {!isActive(item.path) && (
                   <div
-                    className={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b ${
-                      getSectionColor(group.title).gradient
-                    }`}
+                    className={`absolute inset-0 bg-gradient-to-r ${
+                      getSectionColor(item.section).gradient
+                    } opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
                   ></div>
                 )}
 
-                <span
-                  className={
-                    activeGroup === group.title
-                      ? `font-semibold ${
-                          getSectionColor(group.title).textColor
-                        }`
-                      : ""
-                  }
-                >
-                  {group.title}
-                </span>
+                {/* Shine effect for active items */}
+                {isActive(item.path) && (
+                  <div className="absolute inset-0 opacity-100">
+                    <div className="absolute inset-0 translate-x-full animate-shimmer-slow bg-white/20 skew-x-[45deg]"></div>
+                  </div>
+                )}
 
-                <div
+                <item.icon
+                  size={16}
                   className={cn(
-                    "transition-all duration-300 transform",
-                    activeGroup === group.title
-                      ? `${getSectionColor(group.title).textColor}`
-                      : "text-muted-foreground"
+                    "relative z-10 transition-all duration-300",
+                    !isActive(item.path) && "group-hover:text-white"
                   )}
-                >
-                  {activeGroup === group.title ? (
-                    <ChevronDown size={16} className="animate-bounce-subtle" />
-                  ) : (
-                    <ChevronRight size={16} />
-                  )}
-                </div>
-              </button>
+                />
+              </div>
 
-              {activeGroup === group.title && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="mt-2 ml-2 space-y-1 overflow-hidden"
-                >
-                  {group.items.map((item) => (
-                    <Link
-                      key={item.name}
-                      to={item.path}
-                      className={cn(
-                        "flex items-center gap-3 px-4 py-2.5 text-sm rounded-md transition-all duration-300",
-                        "group relative overflow-hidden",
-                        isActive(item.path)
-                          ? `bg-gradient-to-r from-${
-                              getSectionColor(group.title).bgLight
-                            } to-transparent dark:from-${
-                              getSectionColor(group.title).bgDark
-                            } dark:to-transparent text-foreground font-medium shadow-sm`
-                          : "text-foreground/80 hover:bg-muted/30"
-                      )}
-                    >
-                      {/* Hover effect - subtle gradient */}
-                      <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-300 bg-gradient-to-r from-primary/20 via-background to-accent/20"></div>
+              {/* Item name with underline effect on hover */}
+              <span className="relative">
+                {item.name}
+                <span
+                  className={`absolute bottom-0 left-0 w-0 h-0.5 ${
+                    isActive(item.path)
+                      ? getSectionColor(item.section).gradient
+                      : "bg-foreground/30"
+                  } group-hover:w-full transition-all duration-500 rounded-full opacity-70`}
+                ></span>
+              </span>
 
-                      {/* Icon container with gradient background */}
-                      <div
-                        className={cn(
-                          "p-1.5 rounded-md transition-all duration-300 relative overflow-hidden",
-                          isActive(item.path)
-                            ? `bg-gradient-to-r ${
-                                getSectionColor(group.title).gradient
-                              } text-white shadow-md`
-                            : "bg-muted/40 text-muted-foreground group-hover:text-foreground group-hover:shadow-sm group-hover:bg-muted/60"
-                        )}
-                      >
-                        {/* Animated gradient overlay on hover */}
-                        {!isActive(item.path) && (
-                          <div
-                            className={`absolute inset-0 bg-gradient-to-r ${
-                              getSectionColor(group.title).gradient
-                            } opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
-                          ></div>
-                        )}
-
-                        {/* Shine effect for active items */}
-                        {isActive(item.path) && (
-                          <div className="absolute inset-0 opacity-100">
-                            <div className="absolute inset-0 translate-x-full animate-shimmer-slow bg-white/20 skew-x-[45deg]"></div>
-                          </div>
-                        )}
-
-                        <item.icon
-                          size={16}
-                          className={cn(
-                            "relative z-10 transition-all duration-300",
-                            !isActive(item.path) && "group-hover:text-white"
-                          )}
-                        />
-                      </div>
-
-                      {/* Item name with underline effect on hover */}
-                      <span className="relative">
-                        {item.name}
-                        <span
-                          className={`absolute bottom-0 left-0 w-0 h-0.5 ${
-                            isActive(item.path)
-                              ? getSectionColor(group.title).gradient
-                              : "bg-foreground/30"
-                          } group-hover:w-full transition-all duration-500 rounded-full opacity-70`}
-                        ></span>
-                      </span>
-
-                      {/* Active indicator - right border */}
-                      {isActive(item.path) && (
-                        <div
-                          className={`absolute right-0 top-0 w-1 h-full bg-gradient-to-b ${
-                            getSectionColor(group.title).gradient
-                          }`}
-                        />
-                      )}
-                    </Link>
-                  ))}
-                </motion.div>
+              {/* Active indicator - right border */}
+              {isActive(item.path) && (
+                <div
+                  className={`absolute right-0 top-0 w-1 h-full bg-gradient-to-b ${
+                    getSectionColor(item.section).gradient
+                  }`}
+                />
               )}
-            </div>
+            </Link>
           ))}
         </nav>
       </div>
