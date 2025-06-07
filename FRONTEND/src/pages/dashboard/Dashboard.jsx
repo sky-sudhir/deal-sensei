@@ -1028,7 +1028,7 @@ const Dashboard = () => {
                         </div>
                       </div>
                       <a
-                        href={file.s3_url}
+                        href={file.signed_url}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
