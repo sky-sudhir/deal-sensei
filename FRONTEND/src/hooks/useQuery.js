@@ -13,7 +13,7 @@ export default function useQuery(url, { cb = null, skip = false } = {}) {
 
   const handleLogout = () => {
     dispatch(logout());
-    navigate("/auth/login");
+    navigate("/login");
   };
 
   const fetchData = async () => {

@@ -14,7 +14,7 @@ const useMutation = (params = { cb: null }) => {
 
   const handleLogout = () => {
     dispatch(logout());
-    navigate("/auth/login");
+    navigate("/login");
   };
 
   const mutate = async (query) => {

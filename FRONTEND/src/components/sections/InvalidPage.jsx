@@ -22,7 +22,7 @@ function InvalidPage() {
         </p>
         <div className="flex items-center justify-center gap-4">
           <Button asChild variant="destructive">
-            <Link to="/auth/login">Login Now</Link>
+            <Link to="/login">Login Now</Link>
           </Button>
           <Button asChild variant="outline">
             <Link to="/">Go to Home</Link>

@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { Link } from "react-router-dom";
 
 function NotFound() {
   return (
@@ -15,7 +15,7 @@ function NotFound() {
           Sorry, we can't find the page you're looking for.
         </p>
         <Link
-          to="/auth/login"
+          to="/login"
           className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-medium rounded-md hover:bg-primary/90 transition-colors duration-200"
         >
           <span>←</span> Go Back Home
